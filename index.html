@@ -667,7 +667,7 @@ function checarAcesso(email){
   return new Promise((resolve, reject) => {
     const cbName = '__authCb_'+Date.now()+'_'+Math.floor(Math.random()*1e6);
     const script = document.createElement('script');
-    const timer = setTimeout(()=>{ cleanup(); reject(new Error('tempo esgotado, verifique sua conexão')); }, 8000);
+    const timer = setTimeout(()=>{ cleanup(); reject(new Error('tempo esgotado, verifique sua conexão')); }, 18000);
     function cleanup(){ clearTimeout(timer); delete window[cbName]; script.remove(); }
     window[cbName] = (res)=>{ cleanup(); resolve(res); };
     script.onerror = ()=>{ cleanup(); reject(new Error('falha ao carregar')); };
@@ -967,23 +967,28 @@ async function importarContasArquivo(input){
     }
     if(!rows.length) throw new Error('Planilha vazia');
 
-    // Acha a linha de cabeçalho procurando colunas com "empresa", "banco" e "conta"/"agência"
-    let headerRow=-1, iEmpresa=-1, iBanco=-1, iConta=-1;
+    // Acha a linha de cabeçalho procurando colunas com "empresa"/"proprietário", "banco"/"instituição"
+    // e "conta"/"agência" — cobre tanto o modelo do portal quanto exports de plataformas como o
+    // Datanomik (que usa "Instituição"/"Proprietário" e Agência/Conta em colunas separadas).
+    let headerRow=-1, iEmpresa=-1, iBanco=-1, iConta=-1, iAgencia=-1;
     for(let i=0;i<Math.min(10,rows.length);i++){
       const cells=(rows[i]||[]).map(c=>String(c||'').toLowerCase().trim());
-      const eIdx=cells.findIndex(c=>/empresa/.test(c));
-      const bIdx=cells.findIndex(c=>/banco/.test(c));
-      const cIdx=cells.findIndex(c=>/conta|ag[êe]ncia/.test(c));
-      if(eIdx>=0&&bIdx>=0&&cIdx>=0){ headerRow=i; iEmpresa=eIdx; iBanco=bIdx; iConta=cIdx; break; }
+      const eIdx=cells.findIndex(c=>/empresa|propriet[áa]rio|titular/.test(c));
+      const bIdx=cells.findIndex(c=>/banco|institui[çc][ãa]o/.test(c));
+      const agIdx=cells.findIndex(c=>/^ag[êe]ncia$/.test(c));
+      const cIdx=cells.findIndex(c=>/conta/.test(c)&&!/tag/.test(c));
+      if(eIdx>=0&&bIdx>=0&&cIdx>=0){ headerRow=i; iEmpresa=eIdx; iBanco=bIdx; iConta=cIdx; iAgencia=agIdx; break; }
     }
-    if(headerRow<0) throw new Error('Não encontrei colunas Empresa, Banco e Conta na planilha. Baixe o modelo pra conferir o formato.');
+    if(headerRow<0) throw new Error('Não encontrei colunas de Empresa, Banco e Conta na planilha. Baixe o modelo pra conferir o formato.');
 
     let importadas=0, ignoradas=0;
     rows.slice(headerRow+1).forEach((row,idx)=>{
       const empresa=String(row[iEmpresa]||'').trim();
       const banco=String(row[iBanco]||'').trim();
-      const conta=String(row[iConta]||'').trim();
-      if(!empresa||!banco||!conta){ if(empresa||banco||conta) ignoradas++; return; }
+      const agencia=iAgencia>=0?String(row[iAgencia]||'').trim():'';
+      const contaNum=String(row[iConta]||'').trim();
+      const conta=agencia?`${agencia} / ${contaNum}`:contaNum;
+      if(!empresa||!banco||!contaNum){ if(empresa||banco||contaNum) ignoradas++; return; }
       const jaExiste=contasCadastradas.some(c=>c.empresa.toLowerCase()===empresa.toLowerCase() && c.banco.toLowerCase()===banco.toLowerCase() && normalizaConta(c.conta)===normalizaConta(conta));
       if(jaExiste){ ignoradas++; return; }
       contasCadastradas.push({id:Date.now()+Math.random()+idx, empresa, banco, conta});
