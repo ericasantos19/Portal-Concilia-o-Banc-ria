@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal de Conciliação Bancária</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+:root{
+  --bg:#0a0d12;--bg2:#111520;--bg3:#181e2c;--bg4:#1e2638;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.11);
+  --text:#e8eaf0;--text2:#8b92a8;--text3:#4a5168;
+  --green:#00d4a1;--gd:rgba(0,212,161,0.08);--gb:rgba(0,212,161,0.25);
+  --blue:#4d9fff;--bd:rgba(77,159,255,0.08);--bb:rgba(77,159,255,0.25);
+  --red:#ff5e5e;--rd:rgba(255,94,94,0.08);--rb:rgba(255,94,94,0.25);--rd-hover:rgba(255,94,94,0.15);
+  --amber:#ffb347;--ad:rgba(255,179,71,0.08);--ab:rgba(255,179,71,0.3);
+  --sheets:#00c47e;--shd:rgba(0,196,126,0.08);--shb:rgba(0,196,126,0.25);
+  --hover:rgba(255,255,255,0.02);--dash:rgba(255,255,255,0.08);
+  --topbar-bg:rgba(10,13,18,0.96);
+  --r:10px;--rl:14px;
+}
+:root[data-theme="light"]{
+  --bg:#f4f5f7;--bg2:#ffffff;--bg3:#eef0f3;--bg4:#e4e7ec;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+  --text:#1a1d24;--text2:#5c6270;--text3:#8b91a0;
+  --green:#00966e;--gd:rgba(0,150,110,0.08);--gb:rgba(0,150,110,0.3);
+  --blue:#1f6fe0;--bd:rgba(31,111,224,0.08);--bb:rgba(31,111,224,0.3);
+  --red:#d63c3c;--rd:rgba(214,60,60,0.08);--rb:rgba(214,60,60,0.3);--rd-hover:rgba(214,60,60,0.15);
+  --amber:#b8720a;--ad:rgba(184,114,10,0.1);--ab:rgba(184,114,10,0.3);
+  --sheets:#00875f;--shd:rgba(0,135,95,0.08);--shb:rgba(0,135,95,0.3);
+  --hover:rgba(0,0,0,0.035);--dash:rgba(0,0,0,0.14);
+  --topbar-bg:rgba(244,245,247,0.92);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;font-size:14px;line-height:1.6;min-height:100vh;transition:background .15s,color .15s;}
+
+/* TOPBAR */
+.topbar{border-bottom:1px solid var(--border);padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--topbar-bg);backdrop-filter:blur(16px);z-index:100;transition:background .15s;}
+.logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;}
+.logo-icon{width:28px;height:28px;background:linear-gradient(135deg,var(--green),#00a87f);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.logo-sub{color:var(--text2);font-weight:400;font-size:13px;margin-left:2px;}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.theme-toggle{background:var(--bg3);border:1px solid var(--border2);border-radius:99px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;line-height:1;color:var(--text2);transition:background .15s,border-color .15s;}
+.theme-toggle:hover{background:var(--bg4);color:var(--text);}
+.engine-badge{background:var(--bg3);border:1px solid var(--border2);border-radius:99px;padding:4px 12px;font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;}
+
+/* MAIN */
+.main{max-width:1400px;margin:0 auto;padding:2rem;}
+.sec-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:10px;}
+
+/* CONFIG */
+.config-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.5rem;}
+.config-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;}
+.config-label{font-size:11px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;}
+.config-card input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;outline:none;}
+.config-card input:focus{border-color:var(--green);}
+.config-hint{font-size:10px;color:var(--text3);margin-top:5px;}
+.config-hint a{color:var(--green);text-decoration:none;}
+.sheets-status{font-size:11px;font-family:'DM Mono',monospace;margin-top:5px;}
+.sheets-status.ok{color:var(--sheets);}
+.btn-test-sm{background:none;border:1px solid var(--border2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--text3);cursor:pointer;margin-left:6px;font-family:'Sora',sans-serif;}
+.btn-test-sm:hover{color:var(--text2);border-color:var(--border);}
+
+/* BANCOS SLOTS */
+.bancos-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.btn-add-banco{display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--gd);border:1px solid var(--gb);border-radius:var(--r);color:var(--green);font-size:12px;font-weight:500;cursor:pointer;font-family:'Sora',sans-serif;transition:background .15s;}
+.btn-add-banco:hover{background:rgba(0,212,161,0.15);}
+.bancos-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem;}
+
+/* BANCO SLOT */
+.banco-slot{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;transition:border-color .2s;}
+.banco-slot.ready{border-color:var(--gb);}
+.banco-slot.error{border-color:var(--rb);}
+.slot-header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg3);}
+.slot-num{width:22px;height:22px;border-radius:50%;background:var(--bg4);border:1px solid var(--border2);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;color:var(--text2);font-family:'DM Mono',monospace;flex-shrink:0;}
+.slot-info{flex:1;}
+.slot-empresa{font-size:13px;font-weight:500;color:var(--text);}
+.slot-conta{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;}
+.slot-status{font-size:11px;font-family:'DM Mono',monospace;}
+.slot-status.ok{color:var(--green);}
+.slot-status.warn{color:var(--amber);}
+.slot-status.pending{color:var(--text3);}
+.btn-remove-slot{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:4px;transition:color .15s;}
+.btn-remove-slot:hover{color:var(--red);}
+.slot-body{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+
+/* UPLOAD MINI */
+.upload-mini{padding:14px 16px;cursor:pointer;transition:background .15s;position:relative;}
+.upload-mini:first-child{border-right:1px solid var(--border);}
+.upload-mini:hover{background:var(--hover);}
+.upload-mini.has-file{background:rgba(0,212,161,0.03);}
+.upload-mini.is-erp.has-file{background:rgba(77,159,255,0.03);}
+.um-label{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+.um-dot{width:6px;height:6px;border-radius:50%;}
+.um-dot-b{background:var(--green);}
+.um-dot-e{background:var(--blue);}
+.um-dropzone{border:1px dashed var(--dash);border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px;transition:border-color .15s;}
+.upload-mini.has-file .um-dropzone{border-color:rgba(0,212,161,0.2);border-style:solid;}
+.upload-mini.is-erp.has-file .um-dropzone{border-color:rgba(77,159,255,0.2);border-style:solid;}
+.um-icon{font-size:18px;opacity:.4;flex-shrink:0;}
+.um-text{font-size:12px;color:var(--text2);}
+.um-sub{font-size:10px;color:var(--text3);}
+.um-fname{font-size:11px;font-weight:500;color:var(--green);font-family:'DM Mono',monospace;word-break:break-all;}
+.um-fname-erp{color:var(--blue);}
+.um-fsize{font-size:10px;color:var(--text3);}
+input[type="file"]{display:none;}
+
+/* AVISO ARQUIVO TRUNCADO */
+.warn-box{background:rgba(255,179,71,0.08);border:1px solid rgba(255,179,71,0.25);border-radius:6px;padding:8px 12px;font-size:11px;color:var(--amber);margin-top:8px;display:none;}
+.warn-box.show{display:block;}
+
+/* COL MAP DENTRO DO SLOT */
+.slot-colmap{padding:14px 16px;border-top:1px solid var(--border);background:var(--bg3);display:none;}
+.slot-colmap.show{display:block;}
+.colmap-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.colmap-section{background:var(--bg4);border-radius:8px;padding:12px;}
+.colmap-label{font-size:10px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+.colmap-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.colmap-row label{font-size:11px;color:var(--text3);width:70px;flex-shrink:0;}
+.colmap-row select{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;padding:5px 8px;font-size:11px;color:var(--text);outline:none;font-family:'DM Mono',monospace;}
+.colmap-row select:focus{border-color:var(--green);}
+.mode-badge{font-size:10px;margin-top:8px;padding:5px 8px;border-radius:5px;font-family:'DM Mono',monospace;}
+.mode-badge.unico{background:var(--gd);color:var(--green);}
+.mode-badge.separado{background:var(--bd);color:var(--blue);}
+.mode-badge.unknown{background:var(--rd);color:var(--red);}
+
+/* CONTROLS */
+.controls-row{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap;}
+.filter-card{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;flex:1;}
+.filter-card label{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.filter-card input[type="date"]{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;font-size:12px;color:var(--text);font-family:'DM Mono',monospace;outline:none;}
+.filter-card input[type="date"]:focus{border-color:var(--green);}
+.filter-sep{color:var(--text3);}
+.btn-clear{background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:11px;color:var(--text3);cursor:pointer;font-family:'Sora',sans-serif;}
+.btn-clear:hover{border-color:var(--border2);color:var(--text2);}
+.filter-info{font-size:11px;color:var(--green);font-family:'DM Mono',monospace;}
+.btn-primary{height:42px;padding:0 22px;background:linear-gradient(135deg,var(--green),#00b88a);border:none;border-radius:var(--r);color:#0a1a14;font-weight:600;font-size:13px;cursor:pointer;font-family:'Sora',sans-serif;display:flex;align-items:center;gap:7px;transition:opacity .15s,transform .1s;white-space:nowrap;}
+.btn-primary:hover{opacity:.9;}
+.btn-primary:active{transform:scale(.98);}
+.btn-primary:disabled{background:var(--bg3);color:var(--text3);cursor:not-allowed;}
+.btn-secondary{height:42px;padding:0 16px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-size:13px;font-weight:500;cursor:pointer;font-family:'Sora',sans-serif;display:flex;align-items:center;gap:7px;transition:background .15s;white-space:nowrap;}
+.btn-secondary:hover{background:var(--bg3);}
+.btn-secondary:disabled{color:var(--text3);cursor:not-allowed;}
+
+/* PROGRESS */
+.progress-wrap{display:none;margin-bottom:1.5rem;}
+.progress-wrap.active{display:block;}
+.progress-bar{height:2px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-bottom:8px;}
+.progress-fill{height:100%;width:35%;background:linear-gradient(90deg,var(--green),#00b88a);border-radius:2px;animation:pbar 1.4s ease-in-out infinite;}
+@keyframes pbar{0%{transform:translateX(-100%);}100%{transform:translateX(320%);}}
+.progress-msg{font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;}
+.sheets-saving{display:none;align-items:center;gap:8px;font-size:12px;color:var(--sheets);font-family:'DM Mono',monospace;margin-bottom:1rem;background:var(--shd);border:1px solid var(--shb);border-radius:8px;padding:8px 14px;}
+.sheets-saving.show{display:flex;}
+.sheets-dot{width:7px;height:7px;border-radius:50%;background:var(--sheets);animation:blink .8s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* RESULTS */
+.results{display:none;}
+.results.active{display:block;}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.5rem;}
+.kpi-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:16px;}
+.kpi-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+.kpi-value{font-size:22px;font-weight:600;font-family:'DM Mono',monospace;}
+.kpi-sub{font-size:11px;color:var(--text3);margin-top:4px;font-family:'DM Mono',monospace;}
+.kpi-green{color:var(--green);}.kpi-red{color:var(--red);}.kpi-amber{color:var(--amber);}.kpi-blue{color:var(--blue);}.kpi-text{color:var(--text);}
+
+/* BANCO SELECTOR nos resultados */
+.banco-selector{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;}
+.banco-btn{padding:6px 14px;border-radius:99px;font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Mono',monospace;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);transition:all .15s;white-space:nowrap;}
+.banco-btn.active{background:var(--gd);border-color:var(--gb);color:var(--green);}
+.banco-btn:hover:not(.active){border-color:var(--border);color:var(--text);}
+
+/* TABS */
+.tab-bar{display:flex;gap:2px;margin-bottom:1rem;border-bottom:1px solid var(--border);}
+.tab{padding:9px 16px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;}
+.tab:hover{color:var(--text2);}
+.tab.active{color:var(--green);border-bottom-color:var(--green);}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+.period-pill{display:none;align-items:center;gap:6px;background:var(--gd);border:1px solid var(--gb);border-radius:99px;padding:4px 12px;font-size:11px;color:var(--green);font-family:'DM Mono',monospace;margin-bottom:1rem;}
+.period-pill.show{display:inline-flex;}
+
+/* TABLE */
+.table-wrap{border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:1.5rem;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{background:var(--bg3);padding:10px 14px;text-align:left;font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);}
+thead th.num{text-align:right;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--hover);}
+tbody td{padding:10px 14px;color:var(--text);}
+tbody td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px;}
+tbody td.date{font-family:'DM Mono',monospace;color:var(--text2);font-size:12px;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:500;}
+.badge-ok{background:var(--gd);color:var(--green);border:1px solid var(--gb);}
+.badge-div{background:var(--rd);color:var(--red);border:1px solid var(--rb);}
+.badge-warn{background:var(--ad);color:var(--amber);border:1px solid var(--ab);}
+.badge-so-banco{background:var(--bd);color:var(--blue);border:1px solid var(--bb);}
+.val-pos{color:var(--green);}.val-neg{color:var(--red);}.val-zero{color:var(--text3);}
+
+/* EXPAND */
+.exp-wrap{border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:8px;}
+.exp-header{padding:12px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:var(--bg2);transition:background .1s;}
+.exp-header:hover{background:var(--bg3);}
+.exp-left{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;}
+.exp-date{font-family:'DM Mono',monospace;color:var(--text2);font-size:12px;}
+.exp-meta{font-size:12px;color:var(--text3);font-weight:400;}
+.exp-right{display:flex;align-items:center;gap:10px;}
+.chev{transition:transform .2s;color:var(--text3);font-size:12px;}
+.exp-body{display:none;border-top:1px solid var(--border);}
+.exp-body.open{display:block;}
+.sub-header{display:grid;grid-template-columns:2.5fr 1fr 1.2fr 1.2fr 1fr;padding:8px 16px;gap:8px;background:var(--bg3);border-bottom:1px solid var(--border);font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;}
+.sub-header div:nth-child(n+3){text-align:right;}
+.sub-row{display:grid;grid-template-columns:2.5fr 1fr 1.2fr 1.2fr 1fr;padding:9px 16px;gap:8px;border-bottom:1px solid var(--border);font-size:12px;align-items:center;transition:background .1s;}
+.sub-row:last-child{border-bottom:none;}
+.sub-row:hover{background:var(--hover);}
+.sub-row div:nth-child(n+3){text-align:right;font-family:'DM Mono',monospace;font-size:11px;}
+
+/* DIV CARDS */
+.div-card{background:var(--bg2);border:1px solid var(--rd);border-left:3px solid var(--red);border-radius:var(--rl);padding:1.25rem;margin-bottom:10px;}
+.div-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.div-date{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;}
+.div-diff{font-family:'DM Mono',monospace;font-size:15px;font-weight:600;color:var(--red);}
+.div-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+.div-box{background:var(--bg3);border-radius:8px;padding:12px;}
+.div-box-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+.div-box-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;}
+.div-box-row span:last-child{font-family:'DM Mono',monospace;}
+
+/* HISTÓRICO */
+.hist-row{display:grid;grid-template-columns:1.2fr 1.5fr 1fr 1.2fr 0.7fr 0.7fr 0.9fr 0.6fr;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;align-items:center;}
+.hist-row:last-child{border-bottom:none;}
+.hist-row:hover{background:var(--hover);}
+.hist-head{background:var(--bg3);font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;}
+
+/* TOAST */
+.toast{display:none;position:fixed;bottom:2rem;right:2rem;background:var(--bg3);border:1px solid var(--gb);border-radius:var(--r);padding:12px 18px;font-size:13px;color:var(--green);z-index:999;align-items:center;gap:8px;font-family:'DM Mono',monospace;box-shadow:0 8px 32px rgba(0,0,0,.5);}
+.toast.show{display:flex;animation:tin .25s ease;}
+.toast.error{border-color:var(--rb);color:var(--red);}
+.toast.sheets{border-color:var(--shb);color:var(--sheets);}
+@keyframes tin{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px;}
+
+/* LOGIN GATE */
+.login-gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;padding:1.5rem;}
+.login-card{width:100%;max-width:380px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:2rem;text-align:center;}
+.login-logo{width:44px;height:44px;margin:0 auto 14px;background:linear-gradient(135deg,var(--green),#00a87f);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#0a1a14;}
+.login-title{font-size:17px;font-weight:600;margin-bottom:6px;}
+.login-sub{font-size:12px;color:var(--text2);margin-bottom:20px;line-height:1.5;}
+.login-card input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text);outline:none;font-family:'Sora',sans-serif;text-align:center;transition:border-color .15s;}
+.login-card input:focus{border-color:var(--green);}
+.login-btn{width:100%;margin-top:10px;height:40px;background:linear-gradient(135deg,var(--green),#00b88a);border:none;border-radius:8px;color:#0a1a14;font-weight:600;font-size:13px;cursor:pointer;font-family:'Sora',sans-serif;transition:opacity .15s;}
+.login-btn:hover{opacity:.9;}
+.login-btn:disabled{opacity:.5;cursor:not-allowed;}
+.login-msg{margin-top:12px;font-size:12px;min-height:16px;color:var(--text2);}
+.login-msg.error{color:var(--red);}
+.user-badge{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border2);border-radius:99px;padding:4px 10px 4px 12px;font-size:11px;color:var(--text2);}
+.user-badge button{background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;font-family:'Sora',sans-serif;text-decoration:underline;padding:0;}
+.user-badge button:hover{color:var(--text);}
+</style>
+</head>
+<body>
+
+<div class="login-gate" id="loginGate">
+  <div class="login-card">
+    <div class="login-logo">⇄</div>
+    <div class="login-title">Conciliação Bancária</div>
+    <div class="login-sub">Acesso restrito ao time. Entre com o e-mail cadastrado.</div>
+    <input type="email" id="loginEmail" placeholder="seuemail@empresa.com" autocomplete="email" onkeydown="if(event.key==='Enter')tentarLogin()">
+    <button class="login-btn" id="loginBtn" onclick="tentarLogin()">Entrar</button>
+    <div class="login-msg" id="loginMsg"></div>
+  </div>
+</div>
+
+<div id="appRoot" style="display:none">
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">⇄</div>
+    Conciliação Bancária
+    <span class="logo-sub">/ Tesouraria</span>
+  </div>
+  <div class="topbar-right">
+    <span class="user-badge" id="userBadge" style="display:none"></span>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Alternar tema claro/escuro">🌙</button>
+    <span class="engine-badge">⚡ Motor local · sem IA</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- CONFIG -->
+  <div style="margin-bottom:1.5rem">
+    <div class="sec-label">Configuração</div>
+    <div class="config-row">
+      <div class="config-card">
+        <div class="config-label">📊 Google Apps Script URL</div>
+        <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/...">
+        <div class="config-hint">
+          Para salvar histórico automaticamente no Sheets.
+          <button class="btn-test-sm" onclick="testarScript()">Testar</button>
+        </div>
+        <div class="sheets-status" id="sheetsStatus"></div>
+      </div>
+      <div class="config-card">
+        <div class="config-label">📅 Período de conciliação</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+          <input type="date" id="dtInicio" style="flex:1" onchange="applyFilter()">
+          <span style="color:var(--text3);font-size:13px">—</span>
+          <input type="date" id="dtFim" style="flex:1" onchange="applyFilter()">
+          <button class="btn-clear" onclick="clearFilter()">✕</button>
+        </div>
+        <div class="config-hint" style="margin-top:6px"><span id="filterInfo" style="color:var(--green);font-family:'DM Mono',monospace;"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BANCOS -->
+  <div style="margin-bottom:1.5rem">
+    <div class="bancos-header">
+      <div class="sec-label" style="margin-bottom:0">Extratos para conciliação</div>
+      <button class="btn-add-banco" onclick="adicionarSlot()">＋ Adicionar banco</button>
+    </div>
+    <div class="bancos-grid" id="bancosGrid"></div>
+  </div>
+
+  <!-- AÇÕES -->
+  <div class="controls-row">
+    <button class="btn-primary" id="btnAnalisar" onclick="analisar()" disabled>⇄ Conciliar todos</button>
+    <button class="btn-secondary" id="btnExport" onclick="exportarExcel()" disabled>⬇ Exportar Excel</button>
+  </div>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-bar"><div class="progress-fill"></div></div>
+    <div class="progress-msg" id="progressMsg">Processando...</div>
+  </div>
+  <div class="sheets-saving" id="sheetsSaving"><div class="sheets-dot"></div>Salvando no Google Sheets...</div>
+
+  <!-- RESULTS -->
+  <div class="results" id="results">
+    <div class="kpi-row" id="kpiRow"></div>
+    <div id="kpiBancos" style="display:none;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:1.5rem;"></div>
+
+    <!-- SELETOR DE BANCO -->
+    <div class="banco-selector" id="bancoSelector"></div>
+
+    <div class="period-pill" id="periodPill">📅 <span id="periodLabel"></span></div>
+
+    <div class="tab-bar">
+      <div class="tab active" onclick="switchTab('resumo',this)">Resumo diário</div>
+      <div class="tab" onclick="switchTab('variacao',this)">Variação por dia</div>
+      <div class="tab" onclick="switchTab('lancamentos',this)">Lançamentos <span id="lancCount" style="font-size:10px;color:var(--text3)"></span></div>
+      <div class="tab" onclick="switchTab('divergencias',this)">Divergências</div>
+      <div class="tab" onclick="switchTab('historico',this)">Histórico <span id="histCount" style="font-size:10px;color:var(--text3)"></span></div>
+    </div>
+
+    <div id="tab-resumo" class="tab-content active">
+      <div class="table-wrap">
+        <table><thead><tr>
+          <th>Data</th>
+          <th class="num">Banco Créd.</th><th class="num">Banco Déb.</th>
+          <th class="num">TOTVS Créd.</th><th class="num">TOTVS Déb.</th>
+          <th class="num">Diferença</th><th>Status</th>
+        </tr></thead><tbody id="bodyResumo"></tbody></table>
+      </div>
+    </div>
+    <div id="tab-variacao" class="tab-content"><div id="variacaoList"></div></div>
+    <div id="tab-lancamentos" class="tab-content">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+        <input type="text" id="lancSearch" placeholder="Buscar descrição..." oninput="filtrarLancamentos()"
+          style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:7px 12px;font-size:12px;color:var(--text);outline:none;width:220px;">
+        <select id="lancFiltroStatus" onchange="filtrarLancamentos()"
+          style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--text);outline:none;">
+          <option value="">Todos os status</option>
+          <option value="conciliado">✓ Conciliados</option>
+          <option value="somente_banco">Só no banco</option>
+          <option value="somente_erp">Só no TOTVS</option>
+        </select>
+        <select id="lancFiltroDia" onchange="filtrarLancamentos()"
+          style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--text);outline:none;font-family:'DM Mono',monospace;">
+          <option value="">Todos os dias</option>
+        </select>
+        <span id="lancCountLabel" style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:auto;"></span>
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr>
+          <th style="width:110px">Data</th>
+          <th>Descrição Banco</th><th class="num">Valor Banco</th>
+          <th>Descrição TOTVS</th><th class="num">Valor TOTVS</th>
+          <th style="width:110px">Status</th>
+        </tr></thead><tbody id="bodyLanc"></tbody></table>
+      </div>
+    </div>
+    <div id="tab-divergencias" class="tab-content"><div id="divList"></div></div>
+    <div id="tab-historico" class="tab-content">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:12px;color:var(--text3)">Últimas <span id="histTotal">0</span> análises salvas neste navegador</span>
+        <button onclick="limparHistorico()" style="display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--rd);border:1px solid var(--rb);border-radius:var(--r);color:var(--red);font-size:12px;font-weight:500;cursor:pointer;font-family:'Sora',sans-serif;transition:background .15s;" onmouseover="this.style.background='var(--rd-hover)'" onmouseout="this.style.background='var(--rd)'">
+          🗑 Limpar histórico
+        </button>
+      </div>
+      <div class="table-wrap">
+        <div class="hist-row hist-head">
+          <div>Data</div><div>Empresa</div><div>Banco/Conta</div><div>Período</div>
+          <div>Dias</div><div>Diverg.</div><div>Δ Total</div><div>Sheets</div>
+        </div>
+        <div id="histBody"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast"><span id="toastIcon">✓</span> <span id="toastMsg"></span></div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// ─── STATE ───────────────────────────────────────────────
+let slots = [];           // [{id, empresa, conta, colsBank, colsErp, rawBank, rawErp, result}]
+let slotCounter = 0;
+let allResults = [];      // resultado por slot
+let currentSlotIdx = 0;
+let allLancamentos = [];
+
+// localStorage pode falhar (política do navegador, file:// restrito, modo privado...). Isso não
+// pode travar o script inteiro no meio — as funções abaixo dessas linhas ficariam inacessíveis.
+function lsGet(key){ try{ return localStorage.getItem(key); }catch(e){ return null; } }
+function lsSet(key,val){ try{ localStorage.setItem(key,val); }catch(e){} }
+function lsRemove(key){ try{ localStorage.removeItem(key); }catch(e){} }
+
+let historico = JSON.parse(lsGet('concHist')||'[]');
+
+// ─── TEMA ────────────────────────────────────────────────
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn=document.getElementById('themeToggle');
+  if(btn) btn.textContent = theme==='light' ? '🌙' : '☀️';
+}
+function toggleTheme(){
+  const next = document.documentElement.getAttribute('data-theme')==='light' ? 'dark' : 'light';
+  applyTheme(next);
+  lsSet('theme', next);
+}
+
+// ─── ACESSO (portão de e-mail) ────────────────────────────
+// Não é segurança de verdade (é tudo client-side, dá pra contornar vendo o código da página) —
+// serve só como uma portaria simples pro time, checando o e-mail contra a aba "Usuarios" da
+// planilha Google configurada abaixo.
+const AUTH_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx2Q_3n4eWnRcmv0oUmZhDItsCP1YD-JGvIUVplh0gbwT4UAtvp9LEtHBgX-GalxjgNrQ/exec';
+
+// O Google Apps Script não devolve cabeçalhos de CORS, então fetch() normal não consegue LER a
+// resposta (a chamada chega no servidor, mas o navegador bloqueia a leitura). JSONP contorna isso
+// carregando a resposta como uma tag <script>, que não tem essa restrição.
+function checarAcesso(email){
+  return new Promise((resolve, reject) => {
+    const cbName = '__authCb_'+Date.now()+'_'+Math.floor(Math.random()*1e6);
+    const script = document.createElement('script');
+    const timer = setTimeout(()=>{ cleanup(); reject(new Error('tempo esgotado, verifique sua conexão')); }, 8000);
+    function cleanup(){ clearTimeout(timer); delete window[cbName]; script.remove(); }
+    window[cbName] = (res)=>{ cleanup(); resolve(res); };
+    script.onerror = ()=>{ cleanup(); reject(new Error('falha ao carregar')); };
+    script.src = AUTH_SCRIPT_URL+'?action=checkUser&email='+encodeURIComponent(email)+'&callback='+cbName;
+    document.head.appendChild(script);
+  });
+}
+
+function liberarAcesso(nomeOuEmail){
+  document.getElementById('loginGate').style.display='none';
+  document.getElementById('appRoot').style.display='';
+  const badge=document.getElementById('userBadge');
+  if(badge){ badge.style.display='flex'; badge.innerHTML='👤 '+nomeOuEmail+' <button onclick="sairPortal()">sair</button>'; }
+}
+
+function sairPortal(){
+  lsRemove('authEmail'); lsRemove('authName');
+  location.reload();
+}
+
+async function tentarLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const msg=document.getElementById('loginMsg');
+  const btn=document.getElementById('loginBtn');
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    msg.textContent='Digite um e-mail válido.'; msg.className='login-msg error'; return;
+  }
+  btn.disabled=true; msg.textContent='Verificando...'; msg.className='login-msg';
+  try{
+    const res=await checarAcesso(email);
+    if(res.allowed){
+      lsSet('authEmail',email); lsSet('authName',res.name||'');
+      liberarAcesso(res.name||email);
+    } else {
+      msg.textContent='E-mail não autorizado. Fale com quem administra o portal pra liberar seu acesso.';
+      msg.className='login-msg error';
+    }
+  }catch(e){
+    msg.textContent='Não deu pra verificar agora ('+e.message+'). Tente de novo em instantes.';
+    msg.className='login-msg error';
+  }
+  btn.disabled=false;
+}
+
+(async function initAuth(){
+  const saved=lsGet('authEmail');
+  if(!saved) return;
+  document.getElementById('loginEmail').value=saved;
+  const msg=document.getElementById('loginMsg');
+  msg.textContent='Verificando...'; msg.className='login-msg';
+  try{
+    const res=await checarAcesso(saved);
+    if(res.allowed){ liberarAcesso(res.name||saved); }
+    else{ lsRemove('authEmail'); msg.textContent='Seu acesso foi removido. Fale com quem administra o portal.'; msg.className='login-msg error'; }
+  }catch(e){
+    msg.textContent='Não deu pra verificar seu acesso agora. Tente de novo.'; msg.className='login-msg error';
+  }
+})();
+
+// ─── INIT ─────────────────────────────────────────────────
+(function(){
+  applyTheme(lsGet('theme') || 'dark');
+  const s=lsGet('scriptUrl'); document.getElementById('scriptUrl').value = s || AUTH_SCRIPT_URL;
+  adicionarSlot();
+  renderHistorico();
+})();
+
+// ─── SLOT MANAGEMENT ─────────────────────────────────────
+function adicionarSlot(){
+  const id = ++slotCounter;
+  const slot = {id, empresa:'', conta:'', colsBank:null, colsErp:null, rawBank:[], rawErp:[], result:null};
+  slots.push(slot);
+  renderSlots();
+  checkReady();
+}
+
+function removerSlot(id){
+  slots = slots.filter(s=>s.id!==id);
+  renderSlots();
+  checkReady();
+}
+
+function renderSlots(){
+  const grid = document.getElementById('bancosGrid');
+  grid.innerHTML = '';
+  slots.forEach((slot, si) => {
+    const div = document.createElement('div');
+    div.className = 'banco-slot' + (slot.result ? ' ready' : '');
+    div.id = 'slot-'+slot.id;
+    const statusText = slot.result
+      ? `✓ Conciliado — ${slot.result.totais.dias_divergentes} divergência(s)`
+      : slot.colsBank && slot.colsErp ? 'Pronto para conciliar' : 'Aguardando extratos';
+    const statusCls = slot.result ? 'ok' : slot.colsBank && slot.colsErp ? 'warn' : 'pending';
+
+    div.innerHTML = `
+      <div class="slot-header">
+        <div class="slot-num">${si+1}</div>
+        <div class="slot-info">
+          <div class="slot-empresa">${slot.empresa||'Aguardando arquivo...'}</div>
+          <div class="slot-conta">${slot.conta||'Conta não detectada'}</div>
+        </div>
+        <div class="slot-status ${statusCls}">${statusText}</div>
+        ${slots.length>1?`<button class="btn-remove-slot" onclick="removerSlot(${slot.id})" title="Remover">✕</button>`:''}
+      </div>
+      <div class="slot-body">
+        <div class="upload-mini ${slot.colsBank?'has-file':''}" onclick="document.getElementById('fb-${slot.id}').click()">
+          <div class="um-label"><span class="um-dot um-dot-b"></span>Extrato Bancário</div>
+          <div class="um-dropzone">
+            ${slot.colsBank
+              ? `<div style="color:var(--green);font-size:16px">✓</div><div><div class="um-fname">${slot._bankName||''}</div><div class="um-fsize">${slot._bankSize||''}</div></div>`
+              : `<div class="um-icon">📄</div><div><div class="um-text">Clique para selecionar</div><div class="um-sub">PDF, Excel ou CSV</div></div>`}
+          </div>
+          <div class="warn-box ${slot._bankWarn?'show':''}" id="warn-b-${slot.id}">⚠ Arquivo com poucas linhas — tente exportar como CSV</div>
+          <input type="file" id="fb-${slot.id}" accept=".pdf,.xlsx,.xls,.csv" onchange="handleFile(${slot.id},'bank',this)">
+        </div>
+        <div class="upload-mini is-erp ${slot.colsErp?'has-file':''}" onclick="document.getElementById('fe-${slot.id}').click()">
+          <div class="um-label"><span class="um-dot um-dot-e"></span>Extrato TOTVS (ERP)</div>
+          <div class="um-dropzone">
+            ${slot.colsErp
+              ? `<div style="color:var(--blue);font-size:16px">✓</div><div><div class="um-fname um-fname-erp">${slot._erpName||''}</div><div class="um-fsize">${slot._erpSize||''}</div></div>`
+              : `<div class="um-icon">📊</div><div><div class="um-text">Clique para selecionar</div><div class="um-sub">PDF, Excel ou CSV</div></div>`}
+          </div>
+          <input type="file" id="fe-${slot.id}" accept=".pdf,.xlsx,.xls,.csv" onchange="handleFile(${slot.id},'erp',this)">
+        </div>
+      </div>
+      <div class="slot-colmap ${slot.colsBank&&slot.colsErp?'show':''}" id="colmap-${slot.id}">
+        <div class="colmap-grid">
+          <div class="colmap-section">
+            <div class="colmap-label"><span style="color:var(--green)">●</span> Extrato Bancário</div>
+            ${buildColMapHTML(slot.id,'b',slot.colsBank)}
+          </div>
+          <div class="colmap-section">
+            <div class="colmap-label"><span style="color:var(--blue)">●</span> Extrato TOTVS</div>
+            ${buildColMapHTML(slot.id,'e',slot.colsErp)}
+          </div>
+        </div>
+      </div>`;
+    grid.appendChild(div);
+  });
+}
+
+function buildColMapHTML(slotId, prefix, cols){
+  if(!cols) return '<div style="font-size:11px;color:var(--text3)">Aguardando arquivo...</div>';
+  const fields = [{id:'Data',label:'Data'},{id:'Desc',label:'Desc.'},{id:'Cred',label:'Créd.'},{id:'Deb',label:'Déb.'},{id:'Val',label:'Valor único'}];
+  const auto = detectCols(cols.headers);
+  let html = '';
+  fields.forEach(f => {
+    const selId = `cm-${slotId}-${prefix}${f.id}`;
+    html += `<div class="colmap-row"><label>${f.label}</label><select id="${selId}" onchange="recheckSlot(${slotId})">`;
+    html += '<option value="">— ignorar —</option>';
+    cols.headers.forEach(h => {
+      const selected = isAutoSelected(f.id, h, auto, prefix) ? 'selected' : '';
+      html += `<option value="${h.idx}" ${selected}>${h.name}</option>`;
+    });
+    html += '</select></div>';
+  });
+  // Modo badge
+  const mode = auto.useValorUnico ? 'valor único com sinal' : auto.credCol&&auto.debCol ? 'crédito/débito separados' : 'não detectado';
+  const modeCls = auto.useValorUnico ? 'unico' : auto.credCol&&auto.debCol ? 'separado' : 'unknown';
+  html += `<div class="mode-badge ${modeCls}">⚡ ${mode}</div>`;
+  return html;
+}
+
+function detectCols(headers){
+  const credCol = headers.find(h=>/(entr|créd|cred)/i.test(h.name)&&!/(deb|said)/i.test(h.name));
+  const debCol  = headers.find(h=>/(said|déb|deb)/i.test(h.name)&&!/(cred|entr)/i.test(h.name));
+  const valCol  = headers.find(h=>/valor/i.test(h.name)&&!/sald/i.test(h.name));
+  const dataCol = headers.find(h=>/^data$/i.test(h.name.trim()));
+  const descCol = headers.find(h=>/(lan[çc]?amento|lanamento|oper|hist|desc|razao|raz.o)/i.test(h.name));
+  const useValorUnico = !!valCol&&!(credCol&&debCol);
+  return {credCol,debCol,valCol,dataCol,descCol,useValorUnico};
+}
+
+function isAutoSelected(fieldId, h, auto, prefix){
+  const nm = h.name.toLowerCase().trim();
+  if(fieldId==='Data') return h.idx===(auto.dataCol?.idx);
+  if(fieldId==='Desc') return h.idx===(auto.descCol?.idx);
+  if(fieldId==='Cred') return !auto.useValorUnico && h.idx===(auto.credCol?.idx);
+  if(fieldId==='Deb')  return !auto.useValorUnico && h.idx===(auto.debCol?.idx);
+  if(fieldId==='Val')  return auto.useValorUnico  && h.idx===(auto.valCol?.idx);
+  return false;
+}
+
+function recheckSlot(id){ /* selects alterados manualmente */ }
+function checkReady(){
+  const ok = slots.some(s=>s.colsBank&&s.colsErp);
+  document.getElementById('btnAnalisar').disabled = !ok;
+}
+
+// ─── FILE HANDLING ────────────────────────────────────────
+async function handleFile(slotId, type, input){
+  const f = input.files[0]; if(!f) return;
+  const slot = slots.find(s=>s.id===slotId); if(!slot) return;
+  try{
+    const cols = await getColumns(f);
+    if(type==='bank'){
+      slot.colsBank = cols; slot._bankName = f.name; slot._bankSize = (f.size/1024).toFixed(0)+' KB';
+      slot._bankWarn = cols.rows && cols.rows.length < 50;
+      extrairInfoSlot(slot, cols, type);
+    } else {
+      slot.colsErp = cols; slot._erpName = f.name; slot._erpSize = (f.size/1024).toFixed(0)+' KB';
+      extrairInfoSlot(slot, cols, type);
+    }
+    renderSlots(); checkReady();
+  } catch(e){ showToast('Erro ao ler arquivo: '+e.message, 'error'); }
+}
+
+function extrairInfoSlot(slot, cols, type){
+  // Extrai de Excel/CSV
+  if(cols.rows){
+    const rows = cols.rows;
+    for(let i=0;i<Math.min(15,rows.length);i++){
+      const label = String(rows[i][0]||'').trim().toLowerCase();
+      const val   = String(rows[i][1]||'').trim();
+      if(/^nome:?$/i.test(label) && val) slot.empresa = val;
+      if(/^agên?cia:?$/i.test(label) && val) slot._agencia = val;
+      if(/^conta:?$/i.test(label) && val) slot._contaNum = val;
+      const rowStr = rows[i].join('|');
+      const mB = rowStr.match(/BANCO[:\s]*\|([^|]+)\|AGENCIA[:\s]*\|([^|]+)\|CONTA[:\s]*\|([^|]+)/i);
+      if(mB){ slot._banco=mB[1].trim(); slot._agencia=mB[2].trim(); slot._contaNum=mB[3].trim(); }
+    }
+  }
+  // Extrai de PDF (fullText)
+  if(cols.fullText){
+    const lines = cols.fullText.split('\n').slice(0,10);
+    for(const line of lines){
+      // Itaú BBA: "GENION TECHNOLOGY CNPJ 37.834... Agência 0393 Conta 0098772-2"
+      const mConta = line.match(/Agência\s+(\d+)\s+Conta\s+([\d\-]+)/i);
+      if(mConta){ slot._agencia=mConta[1]; slot._contaNum=mConta[2]; }
+      // Nome da empresa: primeira linha longa antes de CNPJ
+      const mEmpresa = line.match(/^([A-Z][A-Z\s]{5,}?)(?:\s+CNPJ|\s+CPF|\s+Ag)/);
+      if(mEmpresa && !slot.empresa) slot.empresa = mEmpresa[1].trim();
+      // TOTVS: "Grupo de Empresa: X / Filial: Y"
+      const mFilial = line.match(/Filial:\s*([^\n\r/|]+)/i);
+      if(mFilial && !slot.empresa) slot.empresa = mFilial[1].trim();
+      // TOTVS: AGENCIA e CONTA no cabeçalho
+      const mAg = line.match(/AGENCIA[:\s]+(\d+)/i);
+      if(mAg) slot._agencia = mAg[1];
+      const mCc = line.match(/CONTA[:\s]+([\d\-]+)/i);
+      if(mCc) slot._contaNum = mCc[1];
+    }
+  }
+  // Monta string de conta
+  if(slot._agencia||slot._contaNum){
+    const b = slot._banco ? ` (${slot._banco})` : '';
+    slot.conta = `Ag ${slot._agencia||'?'} / CC ${slot._contaNum||'?'}${b}`;
+  }
+}
+
+// ─── COLUMN DETECTION ────────────────────────────────────
+async function getColumns(f){
+  const ext = f.name.toLowerCase().split('.').pop();
+  if(ext==='pdf') return await getPdfColumns(f);
+  if(ext==='csv') return await getCsvColumns(f);
+  return await getExcelColumns(f);
+}
+
+// Detecta a linha de cabeçalho (procura a 1ª linha com uma data real em uma das primeiras colunas)
+function detectHeaderRow(rows){
+  let firstDataRow=-1;
+  for(let i=0;i<Math.min(60,rows.length);i++){
+    const row=rows[i]||[];
+    const hasDate = row.slice(0,4).some(c=>{
+      const cc=typeof c==='string'?c.replace(/^'+/,'').trim():c;
+      return (c instanceof Date)||
+        (typeof cc==='string'&&/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(cc))||
+        (typeof c==='number'&&c>25000&&c<60000);
+    });
+    if(hasDate){firstDataRow=i;break;}
+  }
+  let headerRow=firstDataRow>0?firstDataRow-1:0;
+  for(let i=headerRow;i>=0;i--){
+    if((rows[i]||[]).some(c=>/^data$/i.test(String(c||'').replace(/^'+/,'').trim()))){headerRow=i;break;}
+  }
+  return headerRow;
+}
+
+function buildTableResult(rows, type){
+  const headerRow=detectHeaderRow(rows);
+  const headers=(rows[headerRow]||[]).map((h,i)=>({idx:i,name:String(h||`Coluna ${i+1}`).replace(/^'+/,'').trim()}));
+  return {headers,rows,headerRow,type};
+}
+
+async function getExcelColumns(f){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=e=>{
+      try{
+        const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true,raw:true});
+        const ws=wb.Sheets[wb.SheetNames[0]];
+        const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+        res(buildTableResult(rows,'excel'));
+      }catch(e){rej(e);}
+    };
+    r.onerror=()=>rej(new Error('Falha ao ler arquivo'));
+    r.readAsArrayBuffer(f);
+  });
+}
+
+// Detecta separador (;  ,  tab  |) pela linha com mais ocorrências — CSV brasileiro costuma usar ";"
+async function getCsvColumns(f){
+  const text = await f.text();
+  const firstLine = (text.split(/\r?\n/).find(l=>l.trim()) || '');
+  const seps=[';',',','\t','|'];
+  const sep = seps.reduce((best,s)=> firstLine.split(s).length > firstLine.split(best).length ? s : best, seps[0]);
+  try{
+    const wb = XLSX.read(text, {type:'string', raw:true, FS:sep});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+    return buildTableResult(rows,'excel');
+  }catch(e){ throw new Error('Falha ao ler CSV: '+e.message); }
+}
+
+// Extrai QUALQUER pdf tabular (extrato de banco, relatório de ERP, etc) reconstruindo
+// colunas a partir da posição X do texto — sem depender de layout de um banco específico.
+async function getPdfColumns(f){
+  const buf=await f.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  const items=[];
+  for(let p=1;p<=pdf.numPages;p++){
+    const page=await pdf.getPage(p);
+    const tc=await page.getTextContent();
+    tc.items.forEach(it=>{
+      const text=(it.str||'').trim();
+      if(!text) return;
+      items.push({page:p, x:it.transform[4], y:it.transform[5], w:it.width||0, text});
+    });
+  }
+  if(!items.length) throw new Error('PDF sem texto extraível — provavelmente é uma imagem digitalizada. Exporte como Excel/CSV.');
+
+  // Alguns geradores de PDF (relatórios de largura fixa tipo mainframe, ex: TOTVS/SIGA) emitem a
+  // linha INTEIRA como um único bloco de texto, em vez de uma palavra por bloco. Sem isso, não dá
+  // pra detectar colunas por posição. Quebra esses blocos em "palavras" nos espaços largos (2+),
+  // estimando a posição X de cada pedaço pela fração do texto/largura já percorrida.
+  const splitItems=[];
+  items.forEach(it=>{
+    if(!it.w || it.text.length<2 || !/\s{2,}/.test(it.text)){ splitItems.push(it); return; }
+    let idx=0;
+    it.text.split(/(\s{2,})/).forEach(chunk=>{
+      if(!/^\s{2,}$/.test(chunk) && chunk.trim()){
+        splitItems.push({page:it.page, y:it.y, text:chunk.trim(),
+          x: it.x + (idx/it.text.length)*it.w, w: (chunk.length/it.text.length)*it.w});
+      }
+      idx+=chunk.length;
+    });
+  });
+
+  // Agrupa em linhas: mesma página + Y próximo
+  splitItems.sort((a,b)=>a.page-b.page || b.y-a.y || a.x-b.x);
+  const yTol=3;
+  const lines=[];
+  splitItems.forEach(it=>{
+    const last=lines[lines.length-1];
+    if(!last || last.page!==it.page || Math.abs(last.y-it.y)>yTol){
+      lines.push({page:it.page, y:it.y, items:[it]});
+    } else {
+      last.items.push(it);
+    }
+  });
+  lines.forEach(l=>l.items.sort((a,b)=>a.x-b.x));
+
+  const fullText=lines.map(l=>l.items.map(i=>i.text).join(' ')).join('\n');
+  const dateRe=/^\d{1,2}\/\d{1,2}\/\d{2,4}$/;
+
+  // Um PDF costuma ter várias "tabelas" na mesma página (saldos, limites, lançamentos, histórico
+  // de saldo diário...) e, além disso, datas soltas em frases antes da tabela ("Entre 01/07/2026 e
+  // 31/07/2026", "Emissão: 05/08/2026"). Por isso NÃO usamos "a 1ª linha com uma data" pra achar o
+  // cabeçalho — em vez disso, achamos a linha que mais parece cabeçalho de LANÇAMENTOS (tem "Data" +
+  // Crédito/Débito, ou "Data" + Valor), priorizando quem tem Crédito e Débito por ser mais específico.
+  let headerLineIdx=-1, headerSig=null;
+  lines.forEach((l,i)=>{
+    const sig=headerSignature(l.items);
+    if(sig.score>0 && (!headerSig || sig.score>headerSig.score)){ headerSig=sig; headerLineIdx=i; }
+  });
+  if(headerLineIdx<0){
+    // Fallback: nenhum cabeçalho reconhecível — usa a 1ª linha com data isolada
+    const firstDataLine=lines.findIndex(l=>l.items.some(it=>dateRe.test(it.text)));
+    if(firstDataLine<0) throw new Error('Não encontrei nenhum lançamento com data no PDF. Verifique se é um extrato/relatório tabular.');
+    headerLineIdx=Math.max(0,firstDataLine-1);
+    headerSig=headerSignature(lines[headerLineIdx].items);
+  }
+
+  // Acha onde a tabela de lançamentos termina: uma linha com a palavra "Total" isolada (pode vir
+  // no início, ex: "Total 211.033,29 -211.033,29", ou no fim, ex: "NAO CONCILIADOS CONCILIADOS
+  // TOTAL" — que é o cabeçalho do resumo/totais do período, não uma linha do início de outra tabela
+  // diferente (cabeçalho repetido por paginação, com a mesma assinatura, NÃO conta como fim).
+  let cutoff=lines.length;
+  for(let i=headerLineIdx+1;i<lines.length;i++){
+    const ln=lines[i];
+    const hasTotal=ln.items.some(it=>/^total$/i.test(it.text.trim()));
+    if(hasTotal){ cutoff=i; break; }
+    const sig=headerSignature(ln.items);
+    if(sig.score>0){
+      const same=sig.score===headerSig.score&&sig.hasCred===headerSig.hasCred&&sig.hasDeb===headerSig.hasDeb&&sig.hasVal===headerSig.hasVal;
+      if(!same){ cutoff=i; break; }
+    }
+  }
+  const tableLines=lines.slice(headerLineIdx, cutoff);
+
+  // Colunas: usa a posição das próprias palavras do cabeçalho como fronteira (o ponto médio entre
+  // uma palavra e a próxima) — é mais confiável que procurar "vãos vazios" nas linhas de dados,
+  // porque em relatórios de largura fixa o vão entre colunas pode ficar quase todo ocupado (ex: uma
+  // data com 10 caracteres deixa só 1 espaço de folga na coluna "Data"). Só cai pra detecção por
+  // vão em branco nas linhas de dados se o cabeçalho não tiver palavras separadas o suficiente.
+  let boundaries=headerTokenBoundaries(tableLines[0]?.items||[]);
+  if(boundaries.length<1){
+    const txLines=tableLines.filter(l=>l.items.some(it=>dateRe.test(it.text)));
+    const sample=[tableLines[0], ...txLines.slice(0,60)];
+    boundaries=detectColumnBoundaries(sample);
+  }
+
+  let rows;
+  if(boundaries.length>=1){
+    rows=tableLines.map(l=>assignItemsToColumns(l.items, boundaries));
+  } else {
+    // Fallback: não deu pra identificar colunas — extrai Data/Descrição/Valor por linha via regex
+    rows=fallbackLineRows(tableLines);
+  }
+
+  const headers=(rows[0]||[]).map((h,i)=>({idx:i,name:String(h||`Coluna ${i+1}`).trim()}));
+  return {headers, rows, headerRow:0, type:'pdf', fullText};
+}
+
+// Uma linha "parece" cabeçalho de tabela de lançamentos quando tem "Data" isolado + Crédito/Débito
+// (score 2, mais específico) ou "Data" + Valor único (score 1). Serve tanto pra achar a tabela certa
+// entre várias no mesmo PDF quanto pra saber se um cabeçalho repetido (paginação) é o mesmo de antes.
+function headerSignature(items){
+  const hasData=items.some(it=>/^data$/i.test(it.text.trim()));
+  const hasCred=items.some(it=>/(entr|créd|cred)/i.test(it.text)&&!/(deb|said)/i.test(it.text));
+  const hasDeb=items.some(it=>/(said|déb|deb)/i.test(it.text)&&!/(cred|entr)/i.test(it.text));
+  const hasVal=items.some(it=>/valor/i.test(it.text)&&!/sald/i.test(it.text));
+  const score=hasData&&hasCred&&hasDeb?2:hasData&&hasVal?1:0;
+  return {score,hasData,hasCred,hasDeb,hasVal};
+}
+
+// Fronteira de coluna = ponto médio entre o fim de uma palavra do cabeçalho e o início da próxima.
+// Cada palavra do cabeçalho já é (depois do split de blocos largos) um rótulo de coluna distinto.
+function headerTokenBoundaries(items){
+  if(items.length<2) return [];
+  const sorted=[...items].sort((a,b)=>a.x-b.x);
+  const boundaries=[];
+  for(let i=1;i<sorted.length;i++){
+    const prevEnd=sorted[i-1].x+(sorted[i-1].w||0);
+    boundaries.push((prevEnd+sorted[i].x)/2);
+  }
+  return boundaries;
+}
+
+// Acha as fronteiras de coluna: faixas de X onde nenhum texto (de nenhuma linha da amostra) passa —
+// os "corredores" em branco que separam colunas numa tabela. Usado como reserva quando o cabeçalho
+// não tem palavras separadas o suficiente.
+function detectColumnBoundaries(sampleLines){
+  const items=sampleLines.filter(Boolean).flatMap(l=>l.items);
+  if(items.length<2) return [];
+  const widthOf=it=>it.w>0?it.w:Math.max(it.text.length*4.5,5);
+  const minX=Math.min(...items.map(it=>it.x));
+  const maxX=Math.max(...items.map(it=>it.x+widthOf(it)));
+  if(maxX-minX<10) return [];
+  const bucket=3;
+  const n=Math.ceil((maxX-minX)/bucket)+2;
+  const density=new Array(n).fill(0);
+  items.forEach(it=>{
+    const sb=Math.max(0,Math.floor((it.x-minX)/bucket));
+    const eb=Math.min(n-1,Math.floor((it.x+widthOf(it)-minX)/bucket));
+    for(let b=sb;b<=eb;b++) density[b]++;
+  });
+  const minGapBuckets=Math.max(2,Math.round(12/bucket));
+  const boundaries=[];
+  let gapStart=-1;
+  for(let b=0;b<n;b++){
+    if(density[b]===0){
+      if(gapStart<0) gapStart=b;
+    } else {
+      if(gapStart>=0 && (b-gapStart)>=minGapBuckets) boundaries.push(minX+(gapStart+(b-gapStart)/2)*bucket);
+      gapStart=-1;
+    }
+  }
+  return boundaries;
+}
+
+// Encaixa cada pedaço de texto na coluna cujo intervalo [fronteira anterior, próxima fronteira) contém seu X
+function assignItemsToColumns(items, boundaries){
+  const cells=new Array(boundaries.length+1).fill('');
+  items.forEach(it=>{
+    let col=0;
+    while(col<boundaries.length && it.x>=boundaries[col]) col++;
+    cells[col]=cells[col]?cells[col]+' '+it.text:it.text;
+  });
+  return cells;
+}
+
+function fallbackLineRows(lines){
+  const dateRe=/(\d{1,2}\/\d{1,2}\/\d{2,4})/;
+  const numRe=/-?\(?\d{1,3}(?:\.\d{3})*,\d{2}\)?/g;
+  const rows=[['Data','Descrição','Valor']];
+  lines.forEach(l=>{
+    const text=l.items.map(i=>i.text).join(' ');
+    const dm=text.match(dateRe); if(!dm) return;
+    const nums=[...text.matchAll(numRe)].map(m=>m[0]);
+    if(!nums.length) return;
+    const valorRaw=nums[nums.length-1];
+    const desc=text.replace(dm[0],'').replace(valorRaw,'').replace(/\s+/g,' ').trim();
+    rows.push([dm[1], desc, valorRaw]);
+  });
+  return rows;
+}
+
+// ─── PARSE ROWS ──────────────────────────────────────────
+function parseRows(cols, slotId, prefix){
+  const getIdx=fieldId=>{
+    const el=document.getElementById(`cm-${slotId}-${prefix}${fieldId}`);
+    if(!el) return -1;
+    return el.value===''?-1:parseInt(el.value);
+  };
+  const headers=cols.headers||[];
+  const auto=detectCols(headers);
+  const iData = auto.dataCol?auto.dataCol.idx:getIdx('Data');
+  const iDesc = auto.descCol?auto.descCol.idx:getIdx('Desc');
+  const iCred = !auto.useValorUnico&&auto.credCol?auto.credCol.idx:getIdx('Cred');
+  const iDeb  = !auto.useValorUnico&&auto.debCol?auto.debCol.idx:getIdx('Deb');
+  const iVal  = auto.useValorUnico&&auto.valCol?auto.valCol.idx:getIdx('Val');
+
+  // Alguns extratos (e planilhas com células de data mescladas) só imprimem a data na 1ª
+  // transação do dia/grupo, deixando as linhas seguintes sem data própria — e às vezes a
+  // descrição quebra em 2 linhas, com o valor só aparecendo na segunda. Por isso não descarta
+  // essas linhas na hora: guarda tudo primeiro, depois herda a data de cima e junta a descrição
+  // de linhas "órfãs" (sem valor nenhum) na linha seguinte, antes de filtrar o que sobrou inválido.
+  const raw=[];
+  cols.rows.slice(cols.headerRow+1).forEach(row=>{
+    const rawDate=iData>=0?row[iData]:null;
+    const dateKey=parseExcelDate(rawDate);
+    const desc=iDesc>=0?String(row[iDesc]||'').replace(/^'+/,'').trim():'';
+    if(/^saldo\s/i.test(desc)||/^(total|limite|resumo)\b/i.test(desc)) return;
+    // Relatórios paginados (ex: SIGA/TOTVS) repetem uma linha "Agência: X Conta: Y Saldo Inicial:
+    // Z" a cada quebra de página — inclusive quando exportados pra Excel. Se o número da conta cair
+    // por coincidência na coluna de Crédito/Débito, vira um lançamento fantasma. Ignora a linha
+    // inteira quando ela tem essa cara, não importa em qual coluna cada pedaço caiu.
+    if(/\b(ag[êe]ncia|conta|saldo\s+inicial)\s*:/i.test(row.map(c=>String(c==null?'':c)).join(' '))) return;
+    let cred=0,deb=0;
+    if(auto.useValorUnico){
+      const v=parseNum(row[iVal]);
+      if(v<0) deb=Math.abs(v); else if(v>0) cred=v;
+    } else {
+      cred=iCred>=0?Math.abs(parseNum(row[iCred])):0;
+      deb=iDeb>=0?Math.abs(parseNum(row[iDeb])):0;
+    }
+    if(!dateKey&&!desc&&!cred&&!deb) return;
+    raw.push({data:dateKey,desc,cred,deb});
+  });
+
+  // Corta o "rabo" final que não tem nem data nem valor — costuma ser rodapé/aviso legal do PDF
+  // (ex: telefone de atendimento) que vazou pra dentro da tabela por não ter um marcador claro
+  // de fim (tipo uma linha "Total") antes dele.
+  let lastMeaningfulIdx=-1;
+  raw.forEach((r,i)=>{ if(r.data||r.cred||r.deb) lastMeaningfulIdx=i; });
+  if(lastMeaningfulIdx>=0 && lastMeaningfulIdx<raw.length-1) raw.length=lastMeaningfulIdx+1;
+
+  let lastDate=null;
+  raw.forEach(r=>{ if(r.data) lastDate=r.data; else r.data=lastDate; });
+
+  // Linha "órfã" (só descrição, sem valor) é quase sempre a continuação da descrição da
+  // transação ANTERIOR que quebrou em 2 linhas (ex: "TARIFA BANCARIA" numa linha com o valor,
+  // "Max Empresarial 1" sozinha na linha seguinte) — por isso gruda pra trás, não pra frente.
+  const rows=[];
+  for(let i=0;i<raw.length;i++){
+    const r=raw[i];
+    const isOrphan = !r.cred && !r.deb && r.desc;
+    if(isOrphan){
+      if(rows.length){ rows[rows.length-1].desc=(rows[rows.length-1].desc+' '+r.desc).trim(); }
+      else if(i+1<raw.length){ raw[i+1].desc=(r.desc+' '+raw[i+1].desc).trim(); }
+      continue;
+    }
+    if(r.data && (r.cred||r.deb)) rows.push(r);
+  }
+  return rows;
+}
+
+// ─── UTILS ───────────────────────────────────────────────
+function parseExcelDate(v){
+  if(!v) return null;
+  if(v instanceof Date) return toDateKey(v);
+  if(typeof v==='string'){
+    const s=v.replace(/^'+/,'').trim();
+    const m=s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+    if(m) return `${m[1]}/${m[2]}/${m[3]}`;
+    const m2=s.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if(m2) return `${m2[3]}/${m2[2]}/${m2[1]}`;
+  }
+  if(typeof v==='number'){const d=XLSX.SSF.parse_date_code(v);if(d) return `${String(d.d).padStart(2,'0')}/${String(d.m).padStart(2,'0')}/${d.y}`;}
+  return null;
+}
+function toDateKey(d){return d instanceof Date?`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`:String(d);}
+function parseDateBR(s){if(!s) return null;const[d,m,y]=s.split('/');return new Date(+y,+m-1,+d);}
+function parseNum(v){
+  if(v==null||v==='') return 0;
+  if(typeof v==='number') return v;
+  const s=String(v).replace(/^'+/,'').trim();
+  if(!s) return 0;
+  const neg=s.startsWith('-')||s.endsWith('-')||(s.startsWith('(')&&s.endsWith(')'));
+  const clean=s.replace(/[()]/g,'').replace(/-/g,'').replace(/[^\d,.]/g,'');
+  if(!clean) return 0;
+  let n;
+  if(clean.includes(',')&&clean.includes('.')) n=parseFloat(clean.replace(/\./g,'').replace(',','.'));
+  else if(clean.includes(',')) n=parseFloat(clean.replace(',','.'));
+  else n=parseFloat(clean)||0;
+  return neg?-Math.abs(n):n;
+}
+function fmtBRL(v){if(v==null) return '—';return 'R$ '+Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtDiff(v){if(v==null) return '—';return(v<0?'-':v>0?'+':'')+ 'R$ '+Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function numBRL(v){return v==null?0:parseFloat(Number(v).toFixed(2));}
+function showToast(msg,type='ok'){const t=document.getElementById('toast');document.getElementById('toastMsg').textContent=msg;document.getElementById('toastIcon').textContent=type==='error'?'✗':type==='sheets'?'📊':'✓';t.className='toast '+type;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
+function setProgress(msg){document.getElementById('progressMsg').textContent=msg;}
+
+// ─── CONCILIAÇÃO ─────────────────────────────────────────
+async function analisar(){
+  const btn=document.getElementById('btnAnalisar');
+  btn.disabled=true;
+  document.getElementById('progressWrap').classList.add('active');
+  document.getElementById('results').classList.remove('active');
+  document.getElementById('btnExport').disabled=true;
+
+  try{
+    const slotsOk = slots.filter(s=>s.colsBank&&s.colsErp);
+    if(!slotsOk.length) throw new Error('Nenhum par de extratos completo');
+
+    for(const slot of slotsOk){
+      setProgress(`Processando ${slot.empresa}...`);
+      slot.rawBank = parseRows(slot.colsBank, slot.id, 'b');
+      slot.rawErp  = parseRows(slot.colsErp,  slot.id, 'e');
+      if(!slot.rawBank.length) throw new Error(`Banco "${slot.empresa}": nenhuma linha encontrada. Verifique o mapeamento.`);
+      if(!slot.rawErp.length)  throw new Error(`TOTVS "${slot.empresa}": nenhuma linha encontrada. Verifique o mapeamento.`);
+      slot.result = conciliar(slot.rawBank, slot.rawErp);
+    }
+
+    document.getElementById('progressWrap').classList.remove('active');
+    renderAll(slotsOk);
+    document.getElementById('results').classList.add('active');
+    document.getElementById('btnExport').disabled=false;
+    btn.disabled=false;
+    showToast(`${slotsOk.length} banco(s) conciliado(s)!`);
+    renderSlots();
+
+    // Salva histórico
+    slotsOk.forEach(slot=>{
+      salvarHistoricoLocal(slot.result, slot.empresa, slot.conta);
+    });
+    renderHistorico();
+    salvarSheets(slotsOk);
+
+    const di=document.getElementById('dtInicio').value,df=document.getElementById('dtFim').value;
+    if(di||df) applyFilter();
+
+  }catch(e){
+    document.getElementById('progressWrap').classList.remove('active');
+    showToast(e.message,'error');
+    btn.disabled=false;
+  }
+}
+
+function conciliar(banco, erp){
+  const agg=rows=>{
+    const m={};
+    rows.forEach(r=>{
+      if(!m[r.data]) m[r.data]={creditos:0,debitos:0,items:[]};
+      m[r.data].creditos+=r.cred; m[r.data].debitos+=r.deb; m[r.data].items.push(r);
+    });
+    return m;
+  };
+  const bMap=agg(banco),eMap=agg(erp);
+  const allDates=[...new Set([...Object.keys(bMap),...Object.keys(eMap)])].sort((a,b)=>parseDateBR(a)-parseDateBR(b));
+  const dias=[]; let tBC=0,tBD=0,tEC=0,tED=0,diasConc=0,diasDiv=0;
+  allDates.forEach(dt=>{
+    const b=bMap[dt]||{creditos:0,debitos:0,items:[]};
+    const e=eMap[dt]||{creditos:0,debitos:0,items:[]};
+    const bc=Math.round(b.creditos*100)/100,bd=Math.round(b.debitos*100)/100;
+    const ec=Math.round(e.creditos*100)/100,ed=Math.round(e.debitos*100)/100;
+    const bS=Math.round((bc-bd)*100)/100,eS=Math.round((ec-ed)*100)/100;
+    const diff=Math.round((bS-eS)*100)/100;
+    const status=Math.abs(diff)<0.05?'conciliado':Math.abs(diff)<10?'parcial':'divergente';
+    if(status==='conciliado') diasConc++; else if(status==='divergente') diasDiv++;
+    tBC+=bc;tBD+=bd;tEC+=ec;tED+=ed;
+    dias.push({data:dt,banco_creditos:bc,banco_debitos:bd,banco_saldo:bS,erp_creditos:ec,erp_debitos:ed,erp_saldo:eS,diferenca:diff,status,lancamentos:cruzarLanc(b.items,e.items)});
+  });
+  const datas=allDates.map(d=>parseDateBR(d)).filter(Boolean);
+  const inicio=datas.length?toDateKey(new Date(Math.min(...datas))):'—';
+  const fim=datas.length?toDateKey(new Date(Math.max(...datas))):'—';
+  return{
+    periodo:{inicio,fim},
+    totais:{banco_creditos:Math.round(tBC*100)/100,banco_debitos:Math.round(tBD*100)/100,erp_creditos:Math.round(tEC*100)/100,erp_debitos:Math.round(tED*100)/100,diferenca_total:Math.round(((tBC-tBD)-(tEC-tED))*100)/100,total_dias:allDates.length,dias_conciliados:diasConc,dias_divergentes:diasDiv},
+    dias,
+    divergencias:dias.filter(d=>Math.abs(d.diferenca)>=0.05).map(d=>({data:d.data,descricao:`Banco: ${fmtBRL(d.banco_saldo)} | TOTVS: ${fmtBRL(d.erp_saldo)}`,banco_valor:d.banco_saldo,erp_valor:d.erp_saldo,diferenca:d.diferenca,explicacao:gerarExp(d)}))
+  };
+}
+
+function cruzarLanc(bItems,eItems){
+  const used=new Set(); const result=[];
+  bItems.forEach(bi=>{
+    const bv=bi.cred>0?bi.cred:-bi.deb;
+    let matched=null;
+    eItems.forEach((ei,idx)=>{
+      if(used.has(idx)) return;
+      const ev=ei.cred>0?ei.cred:-ei.deb;
+      if(Math.abs(Math.abs(bv)-Math.abs(ev))<0.02){matched=ei;used.add(idx);}
+    });
+    result.push(matched
+      ?{descricao:bi.desc,banco_valor:bv,erp_valor:matched.cred>0?matched.cred:-matched.deb,tipo:bv>=0?'credito':'debito',status:'conciliado',descErp:matched.desc}
+      :{descricao:bi.desc,banco_valor:bv,erp_valor:null,tipo:bv>=0?'credito':'debito',status:'somente_banco',descErp:''});
+  });
+  eItems.forEach((ei,idx)=>{
+    if(used.has(idx)) return;
+    const ev=ei.cred>0?ei.cred:-ei.deb;
+    result.push({descricao:'',banco_valor:null,erp_valor:ev,tipo:ev>=0?'credito':'debito',status:'somente_erp',descErp:ei.desc});
+  });
+  return result;
+}
+
+function gerarExp(d){
+  const sb=d.lancamentos.filter(l=>l.status==='somente_banco').length;
+  const se=d.lancamentos.filter(l=>l.status==='somente_erp').length;
+  if(sb>0&&se===0) return `${sb} lançamento(s) no banco sem correspondência no TOTVS.`;
+  if(se>0&&sb===0) return `${se} lançamento(s) no TOTVS sem correspondência no banco.`;
+  if(sb>0&&se>0)   return `${sb} só no banco e ${se} só no TOTVS.`;
+  return `Diferença de ${fmtBRL(Math.abs(d.diferenca))}.`;
+}
+
+// ─── RENDER ALL ──────────────────────────────────────────
+function renderAll(slotsOk){
+  allResults = slotsOk;
+  const totalBancos  = slotsOk.length;
+  const conciliados  = slotsOk.filter(s=>s.result.totais.dias_divergentes===0).length;
+  const comDiv       = slotsOk.filter(s=>s.result.totais.dias_divergentes>0).length;
+  const pendentes    = slots.filter(s=>!s.result).length;
+  const totalDivDias = slotsOk.reduce((a,s)=>a+s.result.totais.dias_divergentes,0);
+  const deltaTotal   = slotsOk.reduce((a,s)=>a+s.result.totais.diferenca_total,0);
+
+  // KPIs globais (5 cards fixos)
+  document.getElementById('kpiRow').innerHTML=`
+    <div class="kpi-card"><div class="kpi-label">🏦 Bancos</div><div class="kpi-value kpi-text">${totalBancos}</div><div class="kpi-sub">carregados</div></div>
+    <div class="kpi-card"><div class="kpi-label">✓ Conciliados</div><div class="kpi-value kpi-green">${conciliados}</div><div class="kpi-sub">sem divergências</div></div>
+    <div class="kpi-card"><div class="kpi-label">⚠ Com divergência</div><div class="kpi-value ${comDiv>0?'kpi-red':'kpi-green'}">${comDiv}</div><div class="kpi-sub">bancos</div></div>
+    <div class="kpi-card"><div class="kpi-label">📋 Dias divergentes</div><div class="kpi-value ${totalDivDias>0?'kpi-amber':'kpi-green'}">${totalDivDias}</div><div class="kpi-sub">total geral</div></div>
+    <div class="kpi-card"><div class="kpi-label">⇄ Δ Total Geral</div><div class="kpi-value ${Math.abs(deltaTotal)>0.01?'kpi-amber':'kpi-green'}">${fmtDiff(deltaTotal)}</div><div class="kpi-sub">todos os bancos</div></div>`;
+
+  // KPIs por banco (abaixo dos globais, se mais de 1 banco)
+  const kpiBancos = document.getElementById('kpiBancos');
+  if(kpiBancos){
+    if(slotsOk.length > 1){
+      kpiBancos.style.display='grid';
+      kpiBancos.innerHTML = slotsOk.map(slot=>{
+        const t=slot.result.totais;
+        const dt=t.diferenca_total;
+        const cls=Math.abs(dt)>0.01?'kpi-amber':'kpi-green';
+        return `<div class="kpi-card" style="cursor:pointer;border-color:${Math.abs(dt)>0.01?'var(--ab)':'var(--gb)'}" onclick="selecionarBanco('${slot.id}')">
+          <div class="kpi-label">🏦 ${slot.empresa.slice(0,22)}</div>
+          <div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:6px">${slot.conta||'?'}</div>
+          <div class="kpi-value ${cls}" style="font-size:16px">${fmtDiff(dt)}</div>
+          <div class="kpi-sub">${t.dias_divergentes} div. · ${t.total_dias} dias</div>
+        </div>`;
+      }).join('');
+    } else {
+      kpiBancos.style.display='none';
+    }
+  }
+
+  // Seletor de banco
+  const sel = document.getElementById('bancoSelector');
+  sel.innerHTML='';
+  slotsOk.forEach((slot,i)=>{
+    const btn = document.createElement('div');
+    btn.className='banco-btn'+(i===0?' active':'');
+    btn.textContent=`${slot.empresa} — ${slot.conta||'?'}`;
+    btn.onclick=()=>{ document.querySelectorAll('.banco-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); currentSlotIdx=i; renderSlotResult(slot); };
+    sel.appendChild(btn);
+  });
+
+  currentSlotIdx=0;
+  renderSlotResult(slotsOk[0]);
+}
+
+function renderSlotResult(slot){
+  const d = slot.result;
+  const di=document.getElementById('dtInicio').value, df=document.getElementById('dtFim').value;
+  let dias = d.dias;
+  if(di||df){
+    const s=di?new Date(di):null, e=df?new Date(df):null;
+    dias=dias.filter(day=>{const dt=parseDateBR(day.data);if(s&&dt<s) return false;if(e&&dt>e) return false;return true;});
+  }
+  renderTables(dias);
+  renderDivs(d.divergencias||[]);
+  // Lançamentos
+  const lancs = buildLancamentos(slot.rawBank, slot.rawErp);
+  renderLancamentos(lancs);
+}
+
+// ─── FILTER ──────────────────────────────────────────────
+function applyFilter(){
+  if(!allResults.length) return;
+  const slot = allResults[currentSlotIdx];
+  if(slot) renderSlotResult(slot);
+  const di=document.getElementById('dtInicio').value, df=document.getElementById('dtFim').value;
+  const pp=document.getElementById('periodPill');
+  if(di||df){const fmt=d=>d?new Date(d).toLocaleDateString('pt-BR'):'—';document.getElementById('periodLabel').textContent='Período filtrado: '+fmt(di)+' a '+fmt(df);pp.classList.add('show');}
+  else{pp.classList.remove('show');}
+  const fi=document.getElementById('filterInfo');
+  fi.textContent=(di||df)?'Filtro ativo':'';
+}
+function clearFilter(){
+  document.getElementById('dtInicio').value=''; document.getElementById('dtFim').value='';
+  document.getElementById('filterInfo').textContent='';
+  document.getElementById('periodPill').classList.remove('show');
+  applyFilter();
+}
+
+// ─── RENDER TABLES ───────────────────────────────────────
+function renderTables(dias){
+  const body=document.getElementById('bodyResumo'); body.innerHTML='';
+  dias.forEach(d=>{
+    const dc=d.diferenca>0.01?'val-pos':d.diferenca<-0.01?'val-neg':'val-zero';
+    const badge=d.status==='conciliado'?'<span class="badge badge-ok">✓</span>':d.status==='parcial'?'<span class="badge badge-warn">~</span>':'<span class="badge badge-div">⚠</span>';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="date">${d.data}</td><td class="num val-pos">${fmtBRL(d.banco_creditos)}</td><td class="num val-neg">${fmtBRL(d.banco_debitos)}</td><td class="num val-pos">${fmtBRL(d.erp_creditos)}</td><td class="num val-neg">${fmtBRL(d.erp_debitos)}</td><td class="num ${dc}">${fmtDiff(d.diferenca)}</td><td>${badge}</td>`;
+    body.appendChild(tr);
+  });
+  const vl=document.getElementById('variacaoList'); vl.innerHTML='';
+  dias.forEach((dia,idx)=>{
+    const dc=dia.diferenca>0.01?'val-pos':dia.diferenca<-0.01?'val-neg':'val-zero';
+    const badge=dia.status==='conciliado'?'<span class="badge badge-ok">✓</span>':dia.status==='parcial'?'<span class="badge badge-warn">~</span>':'<span class="badge badge-div">⚠</span>';
+    const rows=(dia.lancamentos||[]).map(l=>{
+      const sc=l.status==='conciliado'?'val-pos':l.status==='somente_banco'?'kpi-blue':'val-neg';
+      const sl=l.status==='conciliado'?'✓':l.status==='somente_banco'?'só banco':l.status==='somente_erp'?'só TOTVS':'difere';
+      return `<div class="sub-row"><div style="color:var(--text2)">${l.descricao||'—'}</div><div><span class="badge ${l.tipo==='credito'?'badge-ok':'badge-div'}">${l.tipo}</span></div><div>${l.banco_valor!=null?fmtBRL(l.banco_valor):'—'}</div><div>${l.erp_valor!=null?fmtBRL(l.erp_valor):'—'}</div><div class="${sc}">${sl}</div></div>`;
+    }).join('');
+    const div=document.createElement('div'); div.className='exp-wrap';
+    div.innerHTML=`<div class="exp-header" onclick="toggleExp(${idx})"><div class="exp-left"><span class="exp-date">${dia.data}</span><span class="exp-meta" style="margin-left:8px">${(dia.lancamentos||[]).length} lançto(s) · <span class="${dc}">${fmtDiff(dia.diferenca)}</span></span></div><div class="exp-right">${badge}<span class="chev" id="chev-${idx}">▼</span></div></div><div class="exp-body" id="expbody-${idx}"><div class="sub-header"><div>Descrição</div><div>Tipo</div><div>Banco</div><div>TOTVS</div><div>Status</div></div>${rows||'<div style="padding:12px;text-align:center;color:var(--text3);font-size:12px">Sem lançamentos</div>'}</div>`;
+    vl.appendChild(div);
+  });
+}
+
+function renderDivs(divs){
+  const dl=document.getElementById('divList'); dl.innerHTML='';
+  if(!divs.length){dl.innerHTML='<div style="text-align:center;padding:3rem;color:var(--text3)">✓ Nenhuma divergência encontrada</div>';return;}
+  divs.forEach(d=>{
+    const card=document.createElement('div'); card.className='div-card';
+    card.innerHTML=`<div class="div-card-header"><span class="div-date">${d.data}</span><span class="div-diff">${fmtDiff(d.diferenca)}</span></div><div style="font-size:12px;color:var(--text2);margin-bottom:8px">${d.descricao}</div>${d.explicacao?`<div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:12px;color:var(--text2);margin-bottom:8px">💡 ${d.explicacao}</div>`:''}<div class="div-grid"><div class="div-box"><div class="div-box-label" style="color:var(--green)">● Banco</div><div class="div-box-row"><span style="color:var(--text3)">Saldo líquido</span><span>${fmtBRL(d.banco_valor)}</span></div></div><div class="div-box"><div class="div-box-label" style="color:var(--blue)">● TOTVS</div><div class="div-box-row"><span style="color:var(--text3)">Saldo líquido</span><span>${fmtBRL(d.erp_valor)}</span></div></div></div>`;
+    dl.appendChild(card);
+  });
+}
+
+function toggleExp(idx){const b=document.getElementById('expbody-'+idx),c=document.getElementById('chev-'+idx);b.classList.toggle('open');c.style.transform=b.classList.contains('open')?'rotate(180deg)':'';}
+function selecionarBanco(slotId){
+  const idx = allResults.findIndex(s=>s.id==slotId);
+  if(idx<0) return;
+  currentSlotIdx = idx;
+  document.querySelectorAll('.banco-btn').forEach((b,i)=>{
+    b.classList.toggle('active', i===idx);
+  });
+  renderSlotResult(allResults[idx]);
+}
+
+function switchTab(name,el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));el.classList.add('active');document.getElementById('tab-'+name).classList.add('active');}
+
+// ─── LANÇAMENTOS ─────────────────────────────────────────
+let allLancs=[];
+function buildLancamentos(banco,erp){
+  const result=[]; const erpUsed=new Set();
+  const erpByDate={};
+  erp.forEach((r,idx)=>{ if(!erpByDate[r.data]) erpByDate[r.data]=[]; erpByDate[r.data].push({...r,_idx:idx}); });
+  banco.forEach(b=>{
+    const bv=b.cred>0?b.cred:-b.deb;
+    const cands=erpByDate[b.data]||[];
+    let matched=null;
+    for(const e of cands){ if(erpUsed.has(e._idx)) continue; const ev=e.cred>0?e.cred:-e.deb; if(Math.abs(Math.abs(bv)-Math.abs(ev))<0.02){matched=e;break;} }
+    if(matched){ erpUsed.add(matched._idx); result.push({data:b.data,descBanco:b.desc,valBanco:bv,descErp:matched.desc,valErp:matched.cred>0?matched.cred:-matched.deb,status:'conciliado'}); }
+    else{ result.push({data:b.data,descBanco:b.desc,valBanco:bv,descErp:'',valErp:null,status:'somente_banco'}); }
+  });
+  erp.forEach((e,idx)=>{ if(erpUsed.has(idx)) return; const ev=e.cred>0?e.cred:-e.deb; result.push({data:e.data,descBanco:'',valBanco:null,descErp:e.desc,valErp:ev,status:'somente_erp'}); });
+  return result.sort((a,b)=>parseDateBR(a.data)-parseDateBR(b.data));
+}
+
+function renderLancamentos(lancs){
+  allLancs=lancs;
+  const dias=[...new Set(lancs.map(l=>l.data))].sort((a,b)=>parseDateBR(a)-parseDateBR(b));
+  const sel=document.getElementById('lancFiltroDia');
+  sel.innerHTML='<option value="">Todos os dias</option>';
+  dias.forEach(d=>{ const o=document.createElement('option'); o.value=d; o.textContent=d; sel.appendChild(o); });
+  document.getElementById('lancCount').textContent=`(${lancs.length})`;
+  filtrarLancamentos();
+}
+
+function filtrarLancamentos(){
+  const search=(document.getElementById('lancSearch').value||''). toLowerCase();
+  const status=document.getElementById('lancFiltroStatus').value;
+  const dia=document.getElementById('lancFiltroDia').value;
+  const filtered=allLancs.filter(l=>{
+    if(status&&l.status!==status) return false;
+    if(dia&&l.data!==dia) return false;
+    if(search&&!l.descBanco.toLowerCase().includes(search)&&!l.descErp.toLowerCase().includes(search)) return false;
+    return true;
+  });
+  const body=document.getElementById('bodyLanc'); body.innerHTML='';
+  if(!filtered.length){body.innerHTML='<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text3)">Nenhum lançamento encontrado</td></tr>';document.getElementById('lancCountLabel').textContent='0';return;}
+  document.getElementById('lancCountLabel').textContent=filtered.length+' lançamento(s)';
+  filtered.forEach(l=>{
+    const tr=document.createElement('tr');
+    const badge=l.status==='conciliado'?'<span class="badge badge-ok">✓</span>':l.status==='somente_banco'?'<span class="badge badge-so-banco">só banco</span>':'<span class="badge badge-warn">só TOTVS</span>';
+    const bvf=l.valBanco!=null?`<span class="${l.valBanco>=0?'val-pos':'val-neg'}">${fmtDiff(l.valBanco)}</span>`:'<span style="color:var(--text3)">—</span>';
+    const evf=l.valErp!=null?`<span class="${l.valErp>=0?'val-pos':'val-neg'}">${fmtDiff(l.valErp)}</span>`:'<span style="color:var(--text3)">—</span>';
+    tr.innerHTML=`<td class="date">${l.data}</td><td style="font-size:12px;color:var(--text2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${l.descBanco}">${l.descBanco||'—'}</td><td class="num">${bvf}</td><td style="font-size:12px;color:var(--text2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${l.descErp}">${l.descErp||'—'}</td><td class="num">${evf}</td><td>${badge}</td>`;
+    body.appendChild(tr);
+  });
+}
+
+// ─── HISTÓRICO ───────────────────────────────────────────
+function limparHistorico(){
+  if(!confirm(`Limpar ${historico.length} registro(s) do histórico?\n\nIsso remove apenas o histórico deste navegador. Para limpar o Google Sheets, acesse a planilha e delete as linhas manualmente.`)) return;
+  historico=[];
+  lsRemove('concHist');
+  renderHistorico();
+  showToast('Histórico local limpo!');
+}
+
+function salvarHistoricoLocal(data,empresa,conta){
+  historico.unshift({dataAnalise:new Date().toLocaleString('pt-BR'),empresa,conta:conta||'',periodo:data.periodo.inicio+' a '+data.periodo.fim,totalDias:data.totais.total_dias,divergencias:data.totais.dias_divergentes,deltaTotal:data.totais.diferenca_total,sheets:false});
+  if(historico.length>100) historico=historico.slice(0,100);
+  lsSet('concHist',JSON.stringify(historico));
+}
+function renderHistorico(){
+  const hb=document.getElementById('histBody'),hc=document.getElementById('histCount');
+  const ht=document.getElementById('histTotal');
+  if(!hb) return;
+  hc.textContent=historico.length?`(${historico.length})`:'';
+  if(ht) ht.textContent=historico.length;
+  hb.innerHTML='';
+  if(!historico.length){hb.innerHTML='<div style="padding:2rem;text-align:center;color:var(--text3);font-size:12px">Nenhuma análise salva ainda</div>';return;}
+  historico.forEach(h=>{
+    const row=document.createElement('div'); row.className='hist-row';
+    const dc=Math.abs(h.deltaTotal)>0.01?'val-neg':'val-pos';
+    row.innerHTML=`<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">${h.dataAnalise}</div><div style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${h.empresa}</div><div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)">${h.conta}</div><div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">${h.periodo}</div><div style="font-family:'DM Mono',monospace;font-size:12px;text-align:center">${h.totalDias}</div><div style="text-align:center"><span class="badge ${h.divergencias>0?'badge-div':'badge-ok'}">${h.divergencias}</span></div><div class="${dc}" style="font-family:'DM Mono',monospace;font-size:11px">${fmtDiff(h.deltaTotal)}</div><div style="text-align:center">${h.sheets?'<span style="color:var(--sheets)">📊</span>':'<span style="color:var(--text3)">—</span>'}</div>`;
+    hb.appendChild(row);
+  });
+}
+
+// ─── SHEETS ──────────────────────────────────────────────
+async function testarScript(){
+  const url=document.getElementById('scriptUrl').value.trim();
+  const st=document.getElementById('sheetsStatus');
+  if(!url){st.textContent='⚠ Cole a URL';st.className='sheets-status';return;}
+  st.textContent='⟳ Testando...';st.className='sheets-status';
+  try{ await fetch(url,{method:'GET',mode:'no-cors'}); st.textContent='✓ Conectado';st.className='sheets-status ok';lsSet('scriptUrl',url);}
+  catch(e){ st.textContent='✓ URL salva';st.className='sheets-status ok';lsSet('scriptUrl',url);}
+}
+async function salvarSheets(slotsOk){
+  const url=document.getElementById('scriptUrl').value.trim(); if(!url) return;
+  document.getElementById('sheetsSaving').classList.add('show');
+  try{
+    for(const slot of slotsOk){
+      const payload={action:'salvar',dataAnalise:new Date().toLocaleString('pt-BR'),empresa:slot.empresa,periodo:slot.result.periodo.inicio+' a '+slot.result.periodo.fim,arquivoBanco:slot._bankName||'',arquivoErp:slot._erpName||'',modelo:'Motor local',totais:slot.result.totais,divergencias:slot.result.divergencias||[],dias:slot.result.dias||[]};
+      await fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    }
+    document.getElementById('sheetsSaving').classList.remove('show');
+    showToast('Salvo no Google Sheets!','sheets');
+    historico.slice(0,slotsOk.length).forEach(h=>h.sheets=true);
+    lsSet('concHist',JSON.stringify(historico));
+    renderHistorico();
+  }catch(e){ document.getElementById('sheetsSaving').classList.remove('show'); }
+}
+
+// ─── EXPORT EXCEL ────────────────────────────────────────
+function exportarExcel(){
+  if(!allResults.length) return;
+  const wb=XLSX.utils.book_new();
+  allResults.forEach(slot=>{
+    const d=slot.result; const dias=d.dias;
+    const resumo=[[`Conciliação — ${slot.empresa} — ${slot.conta}`],[`Período: ${d.periodo.inicio} a ${d.periodo.fim}`],[`Exportado em: ${new Date().toLocaleString('pt-BR')}`],[],['Data','Banco Créd','Banco Déb','Saldo Banco','TOTVS Créd','TOTVS Déb','Saldo TOTVS','Diferença','Status']];
+    dias.forEach(day=>resumo.push([day.data,numBRL(day.banco_creditos),numBRL(day.banco_debitos),numBRL(day.banco_saldo),numBRL(day.erp_creditos),numBRL(day.erp_debitos),numBRL(day.erp_saldo),numBRL(day.diferenca),day.status==='conciliado'?'Conciliado':day.status==='parcial'?'Parcial':'Divergente']));
+    const ws=XLSX.utils.aoa_to_sheet(resumo); ws['!cols']=[14,16,16,16,16,16,16,14,12].map(w=>({wch:w}));
+    const shName=(slot.empresa.slice(0,20)+(slot._agencia?'_'+slot._agencia:'')).replace(/[^a-zA-Z0-9_\- ]/g,'').slice(0,31);
+    XLSX.utils.book_append_sheet(wb,ws,shName||'Banco'+slot.id);
+  });
+  // Aba de lançamentos consolidados
+  if(allLancs.length){
+    const lanc=[['Data','Descrição Banco','Valor Banco','Descrição TOTVS','Valor TOTVS','Status']];
+    allLancs.forEach(l=>lanc.push([l.data,l.descBanco||'—',l.valBanco!=null?numBRL(l.valBanco):'—',l.descErp||'—',l.valErp!=null?numBRL(l.valErp):'—',l.status==='conciliado'?'Conciliado':l.status==='somente_banco'?'Só banco':'Só TOTVS']));
+    const wsl=XLSX.utils.aoa_to_sheet(lanc); wsl['!cols']=[12,32,14,32,14,12].map(w=>({wch:w}));
+    XLSX.utils.book_append_sheet(wb,wsl,'Lançamentos');
+  }
+  XLSX.writeFile(wb,`Conciliacao_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.xlsx`);
+  showToast('Excel exportado!');
+}
+</script>
+</body>
+</html>
