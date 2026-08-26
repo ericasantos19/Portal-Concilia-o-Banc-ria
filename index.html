@@ -46,6 +46,24 @@ body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;font-s
 .theme-toggle:hover{background:var(--bg4);color:var(--text);}
 .engine-badge{background:var(--bg3);border:1px solid var(--border2);border-radius:99px;padding:4px 12px;font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;}
 
+/* VIEW NAV */
+.view-nav{display:flex;gap:6px;padding:10px 2rem;border-bottom:1px solid var(--border);background:var(--bg2);}
+.view-nav-btn{background:none;border:1px solid transparent;border-radius:var(--r);padding:7px 14px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;font-family:'Sora',sans-serif;transition:background .15s,color .15s;}
+.view-nav-btn:hover{background:var(--bg3);color:var(--text);}
+.view-nav-btn.active{background:var(--gd);border-color:var(--gb);color:var(--green);}
+
+/* CONTAS CADASTRADAS */
+.contas-form-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:16px;}
+.contas-form-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end;}
+.contas-form-row input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;font-size:13px;color:var(--text);outline:none;font-family:'Sora',sans-serif;}
+.contas-form-row input:focus{border-color:var(--green);}
+.btn-icon-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px 8px;border-radius:4px;transition:color .15s;}
+.btn-icon-del:hover{color:var(--red);}
+
+/* DASHBOARD FECHAMENTO */
+#dashMesAno{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--text);outline:none;font-family:'DM Mono',monospace;}
+#dashMesAno:focus{border-color:var(--green);}
+
 /* MAIN */
 .main{max-width:1400px;margin:0 auto;padding:2rem;}
 .sec-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:10px;}
@@ -292,7 +310,13 @@ tbody td.date{font-family:'DM Mono',monospace;color:var(--text2);font-size:12px;
   </div>
 </div>
 
-<div class="main">
+<div class="view-nav">
+  <button class="view-nav-btn active" id="navConciliacao" onclick="switchView('conciliacao')">⇄ Conciliação</button>
+  <button class="view-nav-btn" id="navContas" onclick="switchView('contas')">🏦 Contas</button>
+  <button class="view-nav-btn" id="navDashboard" onclick="switchView('dashboard')">📊 Dashboard</button>
+</div>
+
+<div class="main" id="viewConciliacao">
 
   <!-- CONFIG -->
   <div style="margin-bottom:1.5rem">
@@ -414,6 +438,50 @@ tbody td.date{font-family:'DM Mono',monospace;color:var(--text2);font-size:12px;
     </div>
   </div>
 </div>
+
+<!-- CONTAS CADASTRADAS -->
+<div class="main" id="viewContas" style="display:none">
+  <div class="sec-label">Contas cadastradas</div>
+  <div class="contas-form-card">
+    <div class="contas-form-row">
+      <div>
+        <div class="config-label">Empresa</div>
+        <input type="text" id="ctaEmpresa" placeholder="Ex: Intervalor Matriz">
+      </div>
+      <div>
+        <div class="config-label">Banco</div>
+        <input type="text" id="ctaBanco" placeholder="Ex: Bradesco">
+      </div>
+      <div>
+        <div class="config-label">Agência / Conta</div>
+        <input type="text" id="ctaConta" placeholder="Ex: 3412 / 3988-8">
+      </div>
+      <button class="btn-primary" style="height:38px" onclick="adicionarConta()">＋ Adicionar</button>
+    </div>
+  </div>
+  <div class="table-wrap" style="margin-top:1rem">
+    <table><thead><tr>
+      <th>Empresa</th><th>Banco</th><th>Agência / Conta</th><th style="width:60px"></th>
+    </tr></thead><tbody id="bodyContas"></tbody></table>
+  </div>
+</div>
+
+<!-- DASHBOARD DE FECHAMENTO -->
+<div class="main" id="viewDashboard" style="display:none">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:10px;">
+    <div class="sec-label" style="margin-bottom:0">Dashboard de fechamento</div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:12px;color:var(--text2)">Mês de fechamento</span>
+      <input type="month" id="dashMesAno" onchange="renderDashboard()">
+    </div>
+  </div>
+  <div class="kpi-row" id="dashKpiRow" style="grid-template-columns:repeat(3,1fr)"></div>
+  <div class="table-wrap">
+    <table><thead><tr>
+      <th>Empresa</th><th>Banco</th><th>Agência / Conta</th><th>Status</th><th>Conciliado em</th>
+    </tr></thead><tbody id="bodyDashboard"></tbody></table>
+  </div>
+</div>
 </div>
 
 <div class="toast" id="toast"><span id="toastIcon">✓</span> <span id="toastMsg"></span></div>
@@ -521,12 +589,108 @@ async function tentarLogin(){
   }
 })();
 
+// ─── VIEWS (Conciliação / Contas / Dashboard) ─────────────
+function switchView(view){
+  ['Conciliacao','Contas','Dashboard'].forEach(v=>{
+    document.getElementById('view'+v).style.display = v.toLowerCase()===view?'':'none';
+    document.getElementById('nav'+v).classList.toggle('active', v.toLowerCase()===view);
+  });
+  if(view==='dashboard') renderDashboard();
+}
+
+// ─── CONTAS CADASTRADAS ────────────────────────────────────
+let contasCadastradas = JSON.parse(lsGet('contasCadastradas')||'[]');
+
+function normalizaConta(s){ return String(s||'').replace(/\D/g,''); }
+
+function adicionarConta(){
+  const empresa=document.getElementById('ctaEmpresa').value.trim();
+  const banco=document.getElementById('ctaBanco').value.trim();
+  const conta=document.getElementById('ctaConta').value.trim();
+  if(!empresa||!banco||!conta){ showToast('Preencha empresa, banco e conta.','error'); return; }
+  contasCadastradas.push({id:Date.now()+Math.random(), empresa, banco, conta});
+  lsSet('contasCadastradas', JSON.stringify(contasCadastradas));
+  document.getElementById('ctaEmpresa').value='';
+  document.getElementById('ctaBanco').value='';
+  document.getElementById('ctaConta').value='';
+  renderContas();
+  showToast('Conta cadastrada!');
+}
+
+function removerConta(id){
+  contasCadastradas = contasCadastradas.filter(c=>c.id!==id);
+  lsSet('contasCadastradas', JSON.stringify(contasCadastradas));
+  renderContas();
+}
+
+function renderContas(){
+  const body=document.getElementById('bodyContas'); if(!body) return;
+  body.innerHTML='';
+  if(!contasCadastradas.length){
+    body.innerHTML='<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--text3)">Nenhuma conta cadastrada ainda</td></tr>';
+    return;
+  }
+  contasCadastradas.forEach(c=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${c.empresa}</td><td>${c.banco}</td><td style="font-family:'DM Mono',monospace;font-size:12px">${c.conta}</td><td><button class="btn-icon-del" onclick="removerConta(${c.id})" title="Remover">✕</button></td>`;
+    body.appendChild(tr);
+  });
+}
+
+// ─── DASHBOARD DE FECHAMENTO ───────────────────────────────
+function periodoMesAno(periodo){
+  const m=String(periodo||'').match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+  return m?`${m[3]}-${m[2]}`:null;
+}
+
+function statusContaNoMes(conta, mesAno){
+  const num=normalizaConta(conta.conta);
+  if(!num) return null;
+  // pega a conciliação mais recente daquela conta dentro do mês selecionado
+  const achou = historico
+    .filter(h=>normalizaConta(h.conta).includes(num) && periodoMesAno(h.periodo)===mesAno)
+    .sort((a,b)=>parseDateBR(b.periodo?.slice(0,10))-parseDateBR(a.periodo?.slice(0,10)))[0];
+  return achou || null;
+}
+
+function renderDashboard(){
+  const sel=document.getElementById('dashMesAno');
+  if(!sel.value){ const d=new Date(); sel.value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+  const mesAno=sel.value;
+  const body=document.getElementById('bodyDashboard'); body.innerHTML='';
+
+  let conciliadas=0;
+  if(!contasCadastradas.length){
+    body.innerHTML='<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text3)">Cadastre contas na aba "Contas" pra acompanhar o fechamento aqui</td></tr>';
+  } else {
+    contasCadastradas.forEach(c=>{
+      const st=statusContaNoMes(c, mesAno);
+      if(st) conciliadas++;
+      const tr=document.createElement('tr');
+      const badge=st?'<span class="badge badge-ok">✓ Conciliado</span>':'<span class="badge badge-div">⏳ Pendente</span>';
+      tr.innerHTML=`<td>${c.empresa}</td><td>${c.banco}</td><td style="font-family:'DM Mono',monospace;font-size:12px">${c.conta}</td><td>${badge}</td><td style="font-size:12px;color:var(--text2)">${st?st.dataAnalise:'—'}</td>`;
+      body.appendChild(tr);
+    });
+  }
+
+  const total=contasCadastradas.length;
+  const pendentes=total-conciliadas;
+  const taxa=total?Math.round(conciliadas/total*100):0;
+  document.getElementById('dashKpiRow').innerHTML=`
+    <div class="kpi-card"><div class="kpi-label">✓ Conciliadas</div><div class="kpi-value kpi-green">${conciliadas}</div><div class="kpi-sub">de ${total} contas</div></div>
+    <div class="kpi-card"><div class="kpi-label">⏳ Pendentes</div><div class="kpi-value ${pendentes>0?'kpi-amber':'kpi-green'}">${pendentes}</div><div class="kpi-sub">ainda faltam</div></div>
+    <div class="kpi-card"><div class="kpi-label">📊 Taxa de fechamento</div><div class="kpi-value ${taxa===100?'kpi-green':'kpi-text'}">${taxa}%</div><div class="kpi-sub">${mesAno}</div></div>`;
+}
+
 // ─── INIT ─────────────────────────────────────────────────
 (function(){
   applyTheme(lsGet('theme') || 'dark');
   const s=lsGet('scriptUrl'); document.getElementById('scriptUrl').value = s || AUTH_SCRIPT_URL;
   adicionarSlot();
   renderHistorico();
+  renderContas();
+  const d=new Date();
+  document.getElementById('dashMesAno').value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
 })();
 
 // ─── SLOT MANAGEMENT ─────────────────────────────────────
