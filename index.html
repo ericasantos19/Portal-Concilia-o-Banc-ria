@@ -36,21 +36,29 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;font-size:14px;line-height:1.6;min-height:100vh;transition:background .15s,color .15s;}
 
-/* TOPBAR */
-.topbar{border-bottom:1px solid var(--border);padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--topbar-bg);backdrop-filter:blur(16px);z-index:100;transition:background .15s;}
-.logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;}
-.logo-icon{width:28px;height:28px;background:linear-gradient(135deg,var(--green),#00a87f);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;}
-.logo-sub{color:var(--text2);font-weight:400;font-size:13px;margin-left:2px;}
-.topbar-right{display:flex;align-items:center;gap:8px;}
+/* APP SHELL / SIDEBAR (identidade visual corporativa) */
+.app-shell{display:flex;min-height:100vh;}
+.sidebar{width:240px;flex-shrink:0;background:#0f1729;display:flex;flex-direction:column;padding:20px 0 0;position:sticky;top:0;align-self:flex-start;height:100vh;overflow-y:auto;}
+.sidebar-brand{display:flex;align-items:center;gap:10px;padding:0 20px 18px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:14px;}
+.sidebar-brand-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#3b82f6,#1e3a8a);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0;}
+.sidebar-brand-text{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.sidebar-brand-sub{font-size:11px;color:#8b95ab;}
+.sidebar-nav{flex:1;padding:0 12px;display:flex;flex-direction:column;gap:2px;}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:#9aa5ba;font-size:13px;font-weight:500;cursor:pointer;background:none;border:none;text-align:left;width:100%;font-family:'Sora',sans-serif;transition:background .15s,color .15s;}
+.sidebar-item:hover{background:rgba(255,255,255,.06);color:#fff;}
+.sidebar-item.active{background:#3b82f6;color:#fff;}
+.sidebar-footer{padding:14px 20px 20px;border-top:1px solid rgba(255,255,255,.08);margin-top:12px;}
+.sidebar-footer-name{color:#fff;font-weight:500;font-size:12px;}
+.sidebar-footer-role{color:#8b95ab;font-size:11px;margin-top:1px;}
+
+.content-area{flex:1;min-width:0;background:var(--bg);}
+.content-topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 2rem;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:100;transition:background .15s;}
+.content-title{font-size:18px;font-weight:600;color:var(--text);}
+.content-sub{font-size:12px;color:var(--text2);margin-top:2px;}
+.content-topbar-right{display:flex;align-items:center;gap:8px;}
 .theme-toggle{background:var(--bg3);border:1px solid var(--border2);border-radius:99px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;line-height:1;color:var(--text2);transition:background .15s,border-color .15s;}
 .theme-toggle:hover{background:var(--bg4);color:var(--text);}
 .engine-badge{background:var(--bg3);border:1px solid var(--border2);border-radius:99px;padding:4px 12px;font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;}
-
-/* VIEW NAV */
-.view-nav{display:flex;gap:6px;padding:10px 2rem;border-bottom:1px solid var(--border);background:var(--bg2);}
-.view-nav-btn{background:none;border:1px solid transparent;border-radius:var(--r);padding:7px 14px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;font-family:'Sora',sans-serif;transition:background .15s,color .15s;}
-.view-nav-btn:hover{background:var(--bg3);color:var(--text);}
-.view-nav-btn.active{background:var(--gd);border-color:var(--gb);color:var(--green);}
 
 /* CONTAS CADASTRADAS */
 .contas-form-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:16px;}
@@ -63,6 +71,24 @@ body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;font-s
 /* DASHBOARD FECHAMENTO */
 #dashMesAno{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--text);outline:none;font-family:'DM Mono',monospace;}
 #dashMesAno:focus{border-color:var(--green);}
+.dash-charts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:1.5rem 0;}
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:18px;}
+.chart-card-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.chart-card-sub{font-size:11px;color:var(--text3);margin-bottom:14px;}
+.donut-row{display:flex;align-items:center;gap:20px;}
+.donut-legend{flex:1;display:flex;flex-direction:column;gap:8px;}
+.donut-legend-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);}
+.donut-legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.donut-legend-val{margin-left:auto;font-family:'DM Mono',monospace;color:var(--text);font-weight:500;}
+
+/* STATUS/REGRAS */
+.status-select{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;font-size:11px;color:var(--text);outline:none;font-family:'Sora',sans-serif;}
+.status-select:focus{border-color:var(--blue);}
+.rule-switch{width:36px;height:20px;border-radius:99px;border:1px solid var(--border2);background:var(--bg3);cursor:pointer;position:relative;transition:background .15s;flex-shrink:0;}
+.rule-switch.on{background:var(--green);border-color:var(--gb);}
+.rule-switch::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .15s;}
+.rule-switch.on::after{transform:translateX(16px);}
+.rules-form-row{display:grid;grid-template-columns:1fr 1.6fr 1.4fr auto;gap:12px;align-items:end;}
 
 /* MAIN */
 .main{max-width:1400px;margin:0 auto;padding:2rem;}
@@ -297,24 +323,42 @@ tbody td.date{font-family:'DM Mono',monospace;color:var(--text2);font-size:12px;
 </div>
 
 <div id="appRoot" style="display:none">
-<div class="topbar">
-  <div class="logo">
-    <div class="logo-icon">⇄</div>
-    Conciliação Bancária
-    <span class="logo-sub">/ Tesouraria</span>
-  </div>
-  <div class="topbar-right">
-    <span class="user-badge" id="userBadge" style="display:none"></span>
-    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Alternar tema claro/escuro">🌙</button>
-    <span class="engine-badge">⚡ Motor local · sem IA</span>
-  </div>
-</div>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">⇄</div>
+      <div>
+        <div class="sidebar-brand-text">Conciliação Bancária</div>
+        <div class="sidebar-brand-sub">Tesouraria</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="sidebar-item" id="navDashboard" onclick="switchView('dashboard')">📊 Dashboard</button>
+      <button class="sidebar-item active" id="navConciliacao" onclick="switchView('conciliacao')">⇄ Nova Conciliação</button>
+      <button class="sidebar-item" id="navContas" onclick="switchView('contas')">🏦 Contas</button>
+      <button class="sidebar-item" id="navConciliacoes" onclick="switchView('conciliacoes')">📋 Conciliações</button>
+      <button class="sidebar-item" id="navPendencias" onclick="switchView('pendencias')">⚠ Pendências</button>
+      <button class="sidebar-item" id="navRegras" onclick="switchView('regras')">⚙ Regras</button>
+      <button class="sidebar-item" id="navHistorico" onclick="switchView('historico')">🕘 Histórico</button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-name" id="sidebarUserName">—</div>
+      <div class="sidebar-footer-role">Tesouraria</div>
+    </div>
+  </aside>
 
-<div class="view-nav">
-  <button class="view-nav-btn active" id="navConciliacao" onclick="switchView('conciliacao')">⇄ Conciliação</button>
-  <button class="view-nav-btn" id="navContas" onclick="switchView('contas')">🏦 Contas</button>
-  <button class="view-nav-btn" id="navDashboard" onclick="switchView('dashboard')">📊 Dashboard</button>
-</div>
+  <div class="content-area">
+    <div class="content-topbar">
+      <div>
+        <div class="content-title" id="contentTitle">Nova Conciliação</div>
+        <div class="content-sub" id="contentSub">Envie o extrato bancário e o ERP para conciliar.</div>
+      </div>
+      <div class="content-topbar-right">
+        <span class="user-badge" id="userBadge" style="display:none"></span>
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Alternar tema claro/escuro">🌙</button>
+        <span class="engine-badge">⚡ Motor local · sem IA</span>
+      </div>
+    </div>
 
 <div class="main" id="viewConciliacao">
 
@@ -476,10 +520,87 @@ tbody td.date{font-family:'DM Mono',monospace;color:var(--text2);font-size:12px;
     </div>
   </div>
   <div class="kpi-row" id="dashKpiRow" style="grid-template-columns:repeat(3,1fr)"></div>
+  <div class="dash-charts">
+    <div class="chart-card">
+      <div class="chart-card-title">Status do fechamento</div>
+      <div class="chart-card-sub">Contas cadastradas conciliadas x pendentes no mês</div>
+      <div class="donut-row">
+        <div id="dashDonutStatus"></div>
+        <div class="donut-legend" id="dashLegendStatus"></div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">Divergências por categoria</div>
+      <div class="chart-card-sub">Pendências abertas no período, agrupadas pelas regras cadastradas</div>
+      <div class="donut-row">
+        <div id="dashDonutCategoria"></div>
+        <div class="donut-legend" id="dashLegendCategoria"></div>
+      </div>
+    </div>
+  </div>
   <div class="table-wrap">
     <table><thead><tr>
       <th>Empresa</th><th>Banco</th><th>Agência / Conta</th><th>Status</th><th>Conciliado em</th>
     </tr></thead><tbody id="bodyDashboard"></tbody></table>
+  </div>
+</div>
+
+<!-- CONCILIAÇÕES (histórico de execuções) -->
+<div class="main" id="viewConciliacoes" style="display:none">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:10px;">
+    <div class="sec-label" style="margin-bottom:0">Conciliações realizadas <span id="conciliacoesCount" style="font-size:11px;color:var(--text3)"></span></div>
+    <input type="text" id="conciliacoesSearch" placeholder="Buscar empresa ou conta..." oninput="renderConciliacoesView()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:7px 12px;font-size:12px;color:var(--text);outline:none;width:240px;">
+  </div>
+  <div class="table-wrap">
+    <div class="hist-row hist-head">
+      <div>Data</div><div>Empresa</div><div>Banco/Conta</div><div>Período</div>
+      <div>Dias</div><div>Diverg.</div><div>Δ Total</div><div>Sheets</div>
+    </div>
+    <div id="bodyConciliacoesView"></div>
+  </div>
+</div>
+
+<!-- PENDÊNCIAS -->
+<div class="main" id="viewPendencias" style="display:none">
+  <div class="sec-label">Pendências</div>
+  <div style="font-size:12px;color:var(--text3);margin-bottom:1rem">Dias com divergência nas conciliações já processadas. As categorias vêm das regras cadastradas na aba Regras.</div>
+  <div class="table-wrap">
+    <table><thead><tr>
+      <th style="width:100px">Data</th><th>Empresa</th><th>Conta</th><th>Motivo</th><th class="num" style="width:130px">Diferença</th><th style="width:150px">Categoria</th><th style="width:150px">Status</th>
+    </tr></thead><tbody id="bodyPendencias"></tbody></table>
+  </div>
+</div>
+
+<!-- REGRAS -->
+<div class="main" id="viewRegras" style="display:none">
+  <div class="sec-label">Regras de categorização</div>
+  <div style="font-size:12px;color:var(--text3);margin-bottom:1rem">Palavras-chave usadas pra categorizar pendências automaticamente — não muda o resultado da conciliação, só ajuda a triar.</div>
+  <div class="contas-form-card">
+    <div class="rules-form-row">
+      <div><div class="config-label">Palavra-chave (no motivo da divergência)</div><input type="text" id="regraChave" placeholder="Ex: TARIFA"></div>
+      <div><div class="config-label">Categoria</div><input type="text" id="regraCategoria" placeholder="Ex: Tarifa Bancária"></div>
+      <div></div>
+      <button class="btn-primary" style="height:38px" onclick="adicionarRegra()">＋ Adicionar</button>
+    </div>
+  </div>
+  <div class="table-wrap" style="margin-top:1rem">
+    <table><thead><tr>
+      <th style="width:70px">Prior.</th><th>Palavra-chave</th><th>Categoria</th><th style="width:90px">Ativa</th><th style="width:50px"></th>
+    </tr></thead><tbody id="bodyRegras"></tbody></table>
+  </div>
+</div>
+
+<!-- HISTÓRICO / AUDITORIA -->
+<div class="main" id="viewHistorico" style="display:none">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:10px;">
+    <div class="sec-label" style="margin-bottom:0">Histórico / Auditoria</div>
+    <input type="text" id="auditSearch" placeholder="Buscar ação..." oninput="renderAuditLog()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:7px 12px;font-size:12px;color:var(--text);outline:none;width:240px;">
+  </div>
+  <div class="table-wrap">
+    <table><thead><tr><th style="width:170px">Quando</th><th style="width:220px">Ação</th><th>Detalhe</th></tr></thead><tbody id="bodyAudit"></tbody></table>
+  </div>
+</div>
+
   </div>
 </div>
 </div>
@@ -543,6 +664,8 @@ function liberarAcesso(nomeOuEmail){
   document.getElementById('appRoot').style.display='';
   const badge=document.getElementById('userBadge');
   if(badge){ badge.style.display='flex'; badge.innerHTML='👤 '+nomeOuEmail+' <button onclick="sairPortal()">sair</button>'; }
+  const su=document.getElementById('sidebarUserName');
+  if(su) su.textContent=nomeOuEmail;
 }
 
 function sairPortal(){
@@ -589,13 +712,186 @@ async function tentarLogin(){
   }
 })();
 
-// ─── VIEWS (Conciliação / Contas / Dashboard) ─────────────
+// ─── VIEWS (Conciliação / Contas / Dashboard / Conciliações / Pendências / Regras / Histórico)
+const VIEW_META = {
+  conciliacao:['Nova Conciliação','Envie o extrato bancário e o ERP para conciliar.'],
+  contas:['Contas cadastradas','Cadastre as contas da empresa para acompanhar o fechamento.'],
+  dashboard:['Dashboard','Acompanhe o status de conciliação por conta no mês de fechamento.'],
+  conciliacoes:['Conciliações','Histórico de todas as conciliações processadas.'],
+  pendencias:['Pendências','Divergências que ainda precisam de atenção.'],
+  regras:['Regras de categorização','Palavras-chave usadas para categorizar pendências automaticamente.'],
+  historico:['Histórico / Auditoria','Trilha de ações realizadas no portal.'],
+};
 function switchView(view){
-  ['Conciliacao','Contas','Dashboard'].forEach(v=>{
+  ['Conciliacao','Contas','Dashboard','Conciliacoes','Pendencias','Regras','Historico'].forEach(v=>{
     document.getElementById('view'+v).style.display = v.toLowerCase()===view?'':'none';
     document.getElementById('nav'+v).classList.toggle('active', v.toLowerCase()===view);
   });
+  const meta=VIEW_META[view];
+  if(meta){ document.getElementById('contentTitle').textContent=meta[0]; document.getElementById('contentSub').textContent=meta[1]; }
   if(view==='dashboard') renderDashboard();
+  if(view==='conciliacoes') renderConciliacoesView();
+  if(view==='pendencias') renderPendencias();
+  if(view==='regras') renderRegras();
+  if(view==='historico') renderAuditLog();
+}
+
+// ─── GRÁFICO DONUT (SVG nativo, sem libs externas) ─────────
+function renderDonutSVG(containerId, legendId, data, emptyMsg){
+  const container=document.getElementById(containerId);
+  const legend=document.getElementById(legendId);
+  if(!container) return;
+  const total=data.reduce((a,d)=>a+d.value,0);
+  if(!total){
+    container.innerHTML=`<div style="width:140px;height:140px;border-radius:50%;border:14px solid var(--bg3);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3);text-align:center;padding:10px">${emptyMsg||'Sem dados'}</div>`;
+    if(legend) legend.innerHTML='';
+    return;
+  }
+  const r=54,cx=70,cy=70,strokeW=22,circumf=2*Math.PI*r;
+  let offset=0;
+  const segs=data.filter(d=>d.value>0).map(d=>{
+    const frac=d.value/total, dash=frac*circumf;
+    const seg=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" style="stroke:${d.color}" stroke-width="${strokeW}" stroke-dasharray="${dash} ${circumf-dash}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${cx} ${cy})"><title>${d.label}: ${d.value} (${Math.round(frac*100)}%)</title></circle>`;
+    offset+=dash;
+    return seg;
+  }).join('');
+  container.innerHTML=`<svg width="140" height="140" viewBox="0 0 140 140">${segs}<text x="70" y="66" text-anchor="middle" font-size="20" font-weight="600" style="fill:var(--text)" font-family="DM Mono, monospace">${total}</text><text x="70" y="82" text-anchor="middle" font-size="9" style="fill:var(--text3)">total</text></svg>`;
+  if(legend){
+    legend.innerHTML=data.filter(d=>d.value>0).map(d=>`<div class="donut-legend-item"><span class="donut-legend-dot" style="background:${d.color}"></span>${d.label}<span class="donut-legend-val">${d.value} · ${Math.round(d.value/total*100)}%</span></div>`).join('');
+  }
+}
+
+// ─── REGRAS DE CATEGORIZAÇÃO ────────────────────────────────
+let regras = JSON.parse(lsGet('regrasCategorizacao')||'null') || [
+  {id:1,chave:'TARIFA',categoria:'Tarifa Bancária',ativa:true},
+  {id:2,chave:'PIX',categoria:'PIX',ativa:true},
+  {id:3,chave:'BOLETO',categoria:'Boleto',ativa:true},
+  {id:4,chave:'ALUGUEL',categoria:'Aluguel',ativa:true},
+  {id:5,chave:'PROLABORE',categoria:'Pró-labore',ativa:true},
+];
+lsSet('regrasCategorizacao', JSON.stringify(regras));
+
+function adicionarRegra(){
+  const chave=document.getElementById('regraChave').value.trim();
+  const categoria=document.getElementById('regraCategoria').value.trim();
+  if(!chave||!categoria){ showToast('Preencha palavra-chave e categoria.','error'); return; }
+  regras.push({id:Date.now()+Math.random(), chave:chave.toUpperCase(), categoria, ativa:true});
+  lsSet('regrasCategorizacao', JSON.stringify(regras));
+  document.getElementById('regraChave').value='';
+  document.getElementById('regraCategoria').value='';
+  renderRegras();
+  registrarAuditoria('Regra criada', `${chave} → ${categoria}`);
+  showToast('Regra adicionada!');
+}
+function removerRegra(id){
+  const r=regras.find(x=>x.id===id);
+  regras=regras.filter(x=>x.id!==id);
+  lsSet('regrasCategorizacao', JSON.stringify(regras));
+  renderRegras();
+  if(r) registrarAuditoria('Regra removida', `${r.chave} → ${r.categoria}`);
+}
+function toggleRegra(id){
+  const r=regras.find(x=>x.id===id); if(!r) return;
+  r.ativa=!r.ativa;
+  lsSet('regrasCategorizacao', JSON.stringify(regras));
+  renderRegras();
+}
+function renderRegras(){
+  const body=document.getElementById('bodyRegras'); if(!body) return;
+  body.innerHTML='';
+  if(!regras.length){ body.innerHTML='<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text3)">Nenhuma regra cadastrada</td></tr>'; return; }
+  regras.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-family:'DM Mono',monospace;color:var(--text3)">${i+1}</td><td style="font-family:'DM Mono',monospace">${r.chave}</td><td>${r.categoria}</td><td><div class="rule-switch ${r.ativa?'on':''}" onclick="toggleRegra(${r.id})" title="${r.ativa?'Ativa':'Inativa'}"></div></td><td><button class="btn-icon-del" onclick="removerRegra(${r.id})" title="Remover">✕</button></td>`;
+    body.appendChild(tr);
+  });
+}
+function categorizarPendencia(motivo){
+  const m=String(motivo||'').toUpperCase();
+  const r=regras.find(r=>r.ativa && m.includes(r.chave));
+  return r?r.categoria:null;
+}
+
+// ─── PENDÊNCIAS ──────────────────────────────────────────────
+let pendenciasStatus = JSON.parse(lsGet('pendenciasStatus')||'{}');
+
+function listarPendencias(){
+  const lista=[];
+  historico.forEach(h=>{
+    (h.divergenciasDetalhe||[]).forEach(d=>{
+      const pid=h.id+'_'+d.data;
+      lista.push({
+        pid, data:d.data, empresa:h.empresa, conta:h.conta,
+        motivo:d.explicacao||d.descricao||'', diferenca:d.diferenca,
+        categoria:categorizarPendencia(d.explicacao||d.descricao||'')||'Sem categoria',
+        status:pendenciasStatus[pid]||'Novo',
+      });
+    });
+  });
+  return lista.sort((a,b)=>parseDateBR(b.data)-parseDateBR(a.data));
+}
+function mudarStatusPendencia(pid, status){
+  pendenciasStatus[pid]=status;
+  lsSet('pendenciasStatus', JSON.stringify(pendenciasStatus));
+}
+function renderPendencias(){
+  const body=document.getElementById('bodyPendencias'); if(!body) return;
+  const lista=listarPendencias();
+  body.innerHTML='';
+  if(!lista.length){ body.innerHTML='<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text3)">Nenhuma pendência — todas as conciliações processadas fecharam sem divergência</td></tr>'; return; }
+  lista.forEach(p=>{
+    const tr=document.createElement('tr');
+    const dc=p.diferenca>0?'val-pos':p.diferenca<0?'val-neg':'val-zero';
+    tr.innerHTML=`<td class="date">${p.data}</td><td>${p.empresa}</td><td style="font-size:11px;color:var(--text2)">${p.conta}</td><td style="font-size:12px;color:var(--text2)">${p.motivo}</td><td class="num ${dc}">${fmtDiff(p.diferenca)}</td><td><span class="badge badge-warn">${p.categoria}</span></td><td>
+      <select class="status-select" onchange="mudarStatusPendencia('${p.pid}',this.value); renderPendencias();">
+        <option ${p.status==='Novo'?'selected':''}>Novo</option>
+        <option ${p.status==='Em análise'?'selected':''}>Em análise</option>
+        <option ${p.status==='Aguardando informação'?'selected':''}>Aguardando informação</option>
+        <option ${p.status==='Resolvido'?'selected':''}>Resolvido</option>
+      </select>
+    </td>`;
+    body.appendChild(tr);
+  });
+}
+
+// ─── CONCILIAÇÕES (histórico de execuções, tela cheia) ──────
+function renderConciliacoesView(){
+  const body=document.getElementById('bodyConciliacoesView'); if(!body) return;
+  const q=(document.getElementById('conciliacoesSearch').value||'').toLowerCase();
+  const filtered=historico.filter(h=>!q||(h.empresa||'').toLowerCase().includes(q)||(h.conta||'').toLowerCase().includes(q));
+  const cnt=document.getElementById('conciliacoesCount');
+  if(cnt) cnt.textContent=historico.length?`(${filtered.length}/${historico.length})`:'';
+  body.innerHTML='';
+  if(!filtered.length){ body.innerHTML='<div style="padding:2rem;text-align:center;color:var(--text3);font-size:12px">Nenhuma conciliação encontrada</div>'; return; }
+  filtered.forEach(h=>{
+    const row=document.createElement('div'); row.className='hist-row';
+    const dcCls=Math.abs(h.deltaTotal)>0.01?'val-neg':'val-pos';
+    row.innerHTML=`<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">${h.dataAnalise}</div><div style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${h.empresa}</div><div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)">${h.conta}</div><div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">${h.periodo}</div><div style="font-family:'DM Mono',monospace;font-size:12px;text-align:center">${h.totalDias}</div><div style="text-align:center"><span class="badge ${h.divergencias>0?'badge-div':'badge-ok'}">${h.divergencias}</span></div><div class="${dcCls}" style="font-family:'DM Mono',monospace;font-size:11px">${fmtDiff(h.deltaTotal)}</div><div style="text-align:center">${h.sheets?'<span style="color:var(--sheets)">📊</span>':'<span style="color:var(--text3)">—</span>'}</div>`;
+    body.appendChild(row);
+  });
+}
+
+// ─── HISTÓRICO / AUDITORIA ───────────────────────────────────
+let auditLog = JSON.parse(lsGet('auditLog')||'[]');
+
+function registrarAuditoria(acao, detalhe){
+  auditLog.unshift({quando:new Date().toLocaleString('pt-BR'), acao, detalhe:detalhe||''});
+  if(auditLog.length>300) auditLog=auditLog.slice(0,300);
+  lsSet('auditLog', JSON.stringify(auditLog));
+  const vh=document.getElementById('viewHistorico');
+  if(vh && vh.style.display!=='none') renderAuditLog();
+}
+function renderAuditLog(){
+  const body=document.getElementById('bodyAudit'); if(!body) return;
+  const q=(document.getElementById('auditSearch').value||'').toLowerCase();
+  const filtered=auditLog.filter(a=>!q||a.acao.toLowerCase().includes(q)||a.detalhe.toLowerCase().includes(q));
+  body.innerHTML='';
+  if(!filtered.length){ body.innerHTML='<tr><td colspan="3" style="text-align:center;padding:2rem;color:var(--text3)">Nenhum registro ainda</td></tr>'; return; }
+  filtered.forEach(a=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)">${a.quando}</td><td style="font-size:12px;font-weight:500">${a.acao}</td><td style="font-size:12px;color:var(--text2)">${a.detalhe}</td>`;
+    body.appendChild(tr);
+  });
 }
 
 // ─── CONTAS CADASTRADAS ────────────────────────────────────
@@ -614,13 +910,16 @@ function adicionarConta(){
   document.getElementById('ctaBanco').value='';
   document.getElementById('ctaConta').value='';
   renderContas();
+  registrarAuditoria('Conta cadastrada', `${empresa} — ${banco} — ${conta}`);
   showToast('Conta cadastrada!');
 }
 
 function removerConta(id){
+  const c=contasCadastradas.find(x=>x.id===id);
   contasCadastradas = contasCadastradas.filter(c=>c.id!==id);
   lsSet('contasCadastradas', JSON.stringify(contasCadastradas));
   renderContas();
+  if(c) registrarAuditoria('Conta removida', `${c.empresa} — ${c.banco} — ${c.conta}`);
 }
 
 function renderContas(){
@@ -680,11 +979,23 @@ function renderDashboard(){
     <div class="kpi-card"><div class="kpi-label">✓ Conciliadas</div><div class="kpi-value kpi-green">${conciliadas}</div><div class="kpi-sub">de ${total} contas</div></div>
     <div class="kpi-card"><div class="kpi-label">⏳ Pendentes</div><div class="kpi-value ${pendentes>0?'kpi-amber':'kpi-green'}">${pendentes}</div><div class="kpi-sub">ainda faltam</div></div>
     <div class="kpi-card"><div class="kpi-label">📊 Taxa de fechamento</div><div class="kpi-value ${taxa===100?'kpi-green':'kpi-text'}">${taxa}%</div><div class="kpi-sub">${mesAno}</div></div>`;
+
+  renderDonutSVG('dashDonutStatus','dashLegendStatus',[
+    {label:'Conciliadas', value:conciliadas, color:'var(--green)'},
+    {label:'Pendentes', value:pendentes, color:'var(--amber)'},
+  ], 'Cadastre contas pra ver o status aqui');
+
+  const paletaCat=['var(--blue)','var(--amber)','var(--red)','var(--green)','var(--text3)'];
+  const abertas=listarPendencias().filter(p=>p.status!=='Resolvido' && periodoMesAno(p.data)===mesAno);
+  const porCat={};
+  abertas.forEach(p=>{ porCat[p.categoria]=(porCat[p.categoria]||0)+1; });
+  const catData=Object.keys(porCat).map((k,i)=>({label:k, value:porCat[k], color:paletaCat[i%paletaCat.length]}));
+  renderDonutSVG('dashDonutCategoria','dashLegendCategoria', catData, 'Sem pendências abertas no mês');
 }
 
 // ─── INIT ─────────────────────────────────────────────────
 (function(){
-  applyTheme(lsGet('theme') || 'dark');
+  applyTheme(lsGet('theme') || 'light');
   const s=lsGet('scriptUrl'); document.getElementById('scriptUrl').value = s || AUTH_SCRIPT_URL;
   adicionarSlot();
   renderHistorico();
@@ -830,6 +1141,7 @@ async function handleFile(slotId, type, input){
       extrairInfoSlot(slot, cols, type);
     }
     renderSlots(); checkReady();
+    registrarAuditoria('Arquivo enviado', `${type==='bank'?'Extrato bancário':'ERP'}: ${f.name}`);
   } catch(e){ showToast('Erro ao ler arquivo: '+e.message, 'error'); }
 }
 
@@ -1548,9 +1860,11 @@ function limparHistorico(){
 }
 
 function salvarHistoricoLocal(data,empresa,conta){
-  historico.unshift({dataAnalise:new Date().toLocaleString('pt-BR'),empresa,conta:conta||'',periodo:data.periodo.inicio+' a '+data.periodo.fim,totalDias:data.totais.total_dias,divergencias:data.totais.dias_divergentes,deltaTotal:data.totais.diferenca_total,sheets:false});
+  const id=Date.now()+'_'+Math.floor(Math.random()*1e6);
+  historico.unshift({id,dataAnalise:new Date().toLocaleString('pt-BR'),empresa,conta:conta||'',periodo:data.periodo.inicio+' a '+data.periodo.fim,totalDias:data.totais.total_dias,divergencias:data.totais.dias_divergentes,deltaTotal:data.totais.diferenca_total,sheets:false,divergenciasDetalhe:data.divergencias||[]});
   if(historico.length>100) historico=historico.slice(0,100);
   lsSet('concHist',JSON.stringify(historico));
+  registrarAuditoria('Conciliação processada', `${empresa} — ${conta||'?'} — ${data.totais.dias_divergentes} divergência(s)`);
 }
 function renderHistorico(){
   const hb=document.getElementById('histBody'),hc=document.getElementById('histCount');
