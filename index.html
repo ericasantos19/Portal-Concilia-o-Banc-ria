@@ -486,6 +486,23 @@ tbody td.date{font-family:'DM Mono',monospace;color:var(--text2);font-size:12px;
 <!-- CONTAS CADASTRADAS -->
 <div class="main" id="viewContas" style="display:none">
   <div class="sec-label">Contas cadastradas</div>
+
+  <div class="contas-form-card" style="margin-bottom:12px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div>
+        <div class="config-label" style="margin-bottom:4px">Importar em lote</div>
+        <div style="font-size:11px;color:var(--text3)">Planilha (Excel ou CSV) com colunas Empresa, Banco e Conta</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <a href="#" onclick="baixarModeloContas();return false;" style="font-size:12px;color:var(--blue);text-decoration:none;">⬇ Baixar modelo</a>
+        <label class="btn-secondary" style="height:36px;cursor:pointer;margin:0;">
+          📤 Importar planilha
+          <input type="file" id="importContasInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="importarContasArquivo(this)">
+        </label>
+      </div>
+    </div>
+  </div>
+
   <div class="contas-form-card">
     <div class="contas-form-row">
       <div>
@@ -920,6 +937,66 @@ function removerConta(id){
   lsSet('contasCadastradas', JSON.stringify(contasCadastradas));
   renderContas();
   if(c) registrarAuditoria('Conta removida', `${c.empresa} — ${c.banco} — ${c.conta}`);
+}
+
+function baixarModeloContas(){
+  const wb=XLSX.utils.book_new();
+  const data=[['Empresa','Banco','Conta'],['Intervalor Matriz','Bradesco','3412 / 3988-8'],['Genion','Santander','3412 / 13000758']];
+  const ws=XLSX.utils.aoa_to_sheet(data);
+  ws['!cols']=[{wch:26},{wch:18},{wch:22}];
+  XLSX.utils.book_append_sheet(wb,ws,'Contas');
+  XLSX.writeFile(wb,'modelo_contas.xlsx');
+}
+
+async function importarContasArquivo(input){
+  const f=input.files[0]; if(!f) return;
+  try{
+    const ext=f.name.toLowerCase().split('.').pop();
+    let rows;
+    if(ext==='csv'){
+      const text=await f.text();
+      const firstLine=(text.split(/\r?\n/).find(l=>l.trim())||'');
+      const seps=[';',',','\t','|'];
+      const sep=seps.reduce((best,s)=>firstLine.split(s).length>firstLine.split(best).length?s:best, seps[0]);
+      const wb=XLSX.read(text,{type:'string',raw:true,FS:sep});
+      rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});
+    } else {
+      const buf=await f.arrayBuffer();
+      const wb=XLSX.read(new Uint8Array(buf),{type:'array',raw:true});
+      rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});
+    }
+    if(!rows.length) throw new Error('Planilha vazia');
+
+    // Acha a linha de cabeçalho procurando colunas com "empresa", "banco" e "conta"/"agência"
+    let headerRow=-1, iEmpresa=-1, iBanco=-1, iConta=-1;
+    for(let i=0;i<Math.min(10,rows.length);i++){
+      const cells=(rows[i]||[]).map(c=>String(c||'').toLowerCase().trim());
+      const eIdx=cells.findIndex(c=>/empresa/.test(c));
+      const bIdx=cells.findIndex(c=>/banco/.test(c));
+      const cIdx=cells.findIndex(c=>/conta|ag[êe]ncia/.test(c));
+      if(eIdx>=0&&bIdx>=0&&cIdx>=0){ headerRow=i; iEmpresa=eIdx; iBanco=bIdx; iConta=cIdx; break; }
+    }
+    if(headerRow<0) throw new Error('Não encontrei colunas Empresa, Banco e Conta na planilha. Baixe o modelo pra conferir o formato.');
+
+    let importadas=0, ignoradas=0;
+    rows.slice(headerRow+1).forEach((row,idx)=>{
+      const empresa=String(row[iEmpresa]||'').trim();
+      const banco=String(row[iBanco]||'').trim();
+      const conta=String(row[iConta]||'').trim();
+      if(!empresa||!banco||!conta){ if(empresa||banco||conta) ignoradas++; return; }
+      const jaExiste=contasCadastradas.some(c=>c.empresa.toLowerCase()===empresa.toLowerCase() && c.banco.toLowerCase()===banco.toLowerCase() && normalizaConta(c.conta)===normalizaConta(conta));
+      if(jaExiste){ ignoradas++; return; }
+      contasCadastradas.push({id:Date.now()+Math.random()+idx, empresa, banco, conta});
+      importadas++;
+    });
+    lsSet('contasCadastradas', JSON.stringify(contasCadastradas));
+    renderContas();
+    registrarAuditoria('Contas importadas', `${importadas} conta(s) de ${f.name}${ignoradas?` (${ignoradas} ignorada(s)/duplicada(s))`:''}`);
+    showToast(`${importadas} conta(s) importada(s)!${ignoradas?' '+ignoradas+' ignorada(s)/duplicada(s).':''}`);
+  }catch(e){
+    showToast('Erro ao importar: '+e.message, 'error');
+  }
+  input.value='';
 }
 
 function renderContas(){
