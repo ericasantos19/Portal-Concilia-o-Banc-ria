@@ -14,20 +14,36 @@
   --text:#e8eaf0;--text2:#8b92a8;--text3:#4a5168;
   --green:#00d4a1;--gd:rgba(0,212,161,0.08);--gb:rgba(0,212,161,0.25);
   --blue:#4d9fff;--bd:rgba(77,159,255,0.08);--bb:rgba(77,159,255,0.25);
-  --red:#ff5e5e;--rd:rgba(255,94,94,0.08);--rb:rgba(255,94,94,0.25);
-  --amber:#ffb347;--ad:rgba(255,179,71,0.08);
+  --red:#ff5e5e;--rd:rgba(255,94,94,0.08);--rb:rgba(255,94,94,0.25);--rd-hover:rgba(255,94,94,0.15);
+  --amber:#ffb347;--ad:rgba(255,179,71,0.08);--ab:rgba(255,179,71,0.3);
   --sheets:#00c47e;--shd:rgba(0,196,126,0.08);--shb:rgba(0,196,126,0.25);
+  --hover:rgba(255,255,255,0.02);--dash:rgba(255,255,255,0.08);
+  --topbar-bg:rgba(10,13,18,0.96);
   --r:10px;--rl:14px;
 }
+:root[data-theme="light"]{
+  --bg:#f4f5f7;--bg2:#ffffff;--bg3:#eef0f3;--bg4:#e4e7ec;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+  --text:#1a1d24;--text2:#5c6270;--text3:#8b91a0;
+  --green:#00966e;--gd:rgba(0,150,110,0.08);--gb:rgba(0,150,110,0.3);
+  --blue:#1f6fe0;--bd:rgba(31,111,224,0.08);--bb:rgba(31,111,224,0.3);
+  --red:#d63c3c;--rd:rgba(214,60,60,0.08);--rb:rgba(214,60,60,0.3);--rd-hover:rgba(214,60,60,0.15);
+  --amber:#b8720a;--ad:rgba(184,114,10,0.1);--ab:rgba(184,114,10,0.3);
+  --sheets:#00875f;--shd:rgba(0,135,95,0.08);--shb:rgba(0,135,95,0.3);
+  --hover:rgba(0,0,0,0.035);--dash:rgba(0,0,0,0.14);
+  --topbar-bg:rgba(244,245,247,0.92);
+}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;font-size:14px;line-height:1.6;min-height:100vh;}
+body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;font-size:14px;line-height:1.6;min-height:100vh;transition:background .15s,color .15s;}
 
 /* TOPBAR */
-.topbar{border-bottom:1px solid var(--border);padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(10,13,18,0.96);backdrop-filter:blur(16px);z-index:100;}
+.topbar{border-bottom:1px solid var(--border);padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--topbar-bg);backdrop-filter:blur(16px);z-index:100;transition:background .15s;}
 .logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;}
 .logo-icon{width:28px;height:28px;background:linear-gradient(135deg,var(--green),#00a87f);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;}
 .logo-sub{color:var(--text2);font-weight:400;font-size:13px;margin-left:2px;}
 .topbar-right{display:flex;align-items:center;gap:8px;}
+.theme-toggle{background:var(--bg3);border:1px solid var(--border2);border-radius:99px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;line-height:1;color:var(--text2);transition:background .15s,border-color .15s;}
+.theme-toggle:hover{background:var(--bg4);color:var(--text);}
 .engine-badge{background:var(--bg3);border:1px solid var(--border2);border-radius:99px;padding:4px 12px;font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;}
 
 /* MAIN */
@@ -73,14 +89,14 @@ body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;font-s
 /* UPLOAD MINI */
 .upload-mini{padding:14px 16px;cursor:pointer;transition:background .15s;position:relative;}
 .upload-mini:first-child{border-right:1px solid var(--border);}
-.upload-mini:hover{background:rgba(255,255,255,0.02);}
+.upload-mini:hover{background:var(--hover);}
 .upload-mini.has-file{background:rgba(0,212,161,0.03);}
 .upload-mini.is-erp.has-file{background:rgba(77,159,255,0.03);}
 .um-label{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:5px;}
 .um-dot{width:6px;height:6px;border-radius:50%;}
 .um-dot-b{background:var(--green);}
 .um-dot-e{background:var(--blue);}
-.um-dropzone{border:1px dashed rgba(255,255,255,0.08);border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px;transition:border-color .15s;}
+.um-dropzone{border:1px dashed var(--dash);border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px;transition:border-color .15s;}
 .upload-mini.has-file .um-dropzone{border-color:rgba(0,212,161,0.2);border-style:solid;}
 .upload-mini.is-erp.has-file .um-dropzone{border-color:rgba(77,159,255,0.2);border-style:solid;}
 .um-icon{font-size:18px;opacity:.4;flex-shrink:0;}
@@ -175,14 +191,14 @@ thead th{background:var(--bg3);padding:10px 14px;text-align:left;font-size:10px;
 thead th.num{text-align:right;}
 tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
 tbody tr:last-child{border-bottom:none;}
-tbody tr:hover{background:rgba(255,255,255,0.02);}
+tbody tr:hover{background:var(--hover);}
 tbody td{padding:10px 14px;color:var(--text);}
 tbody td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px;}
 tbody td.date{font-family:'DM Mono',monospace;color:var(--text2);font-size:12px;}
 .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:500;}
 .badge-ok{background:var(--gd);color:var(--green);border:1px solid var(--gb);}
 .badge-div{background:var(--rd);color:var(--red);border:1px solid var(--rb);}
-.badge-warn{background:var(--ad);color:var(--amber);border:1px solid rgba(255,179,71,.3);}
+.badge-warn{background:var(--ad);color:var(--amber);border:1px solid var(--ab);}
 .badge-so-banco{background:var(--bd);color:var(--blue);border:1px solid var(--bb);}
 .val-pos{color:var(--green);}.val-neg{color:var(--red);}.val-zero{color:var(--text3);}
 
@@ -201,11 +217,11 @@ tbody td.date{font-family:'DM Mono',monospace;color:var(--text2);font-size:12px;
 .sub-header div:nth-child(n+3){text-align:right;}
 .sub-row{display:grid;grid-template-columns:2.5fr 1fr 1.2fr 1.2fr 1fr;padding:9px 16px;gap:8px;border-bottom:1px solid var(--border);font-size:12px;align-items:center;transition:background .1s;}
 .sub-row:last-child{border-bottom:none;}
-.sub-row:hover{background:rgba(255,255,255,.02);}
+.sub-row:hover{background:var(--hover);}
 .sub-row div:nth-child(n+3){text-align:right;font-family:'DM Mono',monospace;font-size:11px;}
 
 /* DIV CARDS */
-.div-card{background:var(--bg2);border:1px solid rgba(255,94,94,.2);border-left:3px solid var(--red);border-radius:var(--rl);padding:1.25rem;margin-bottom:10px;}
+.div-card{background:var(--bg2);border:1px solid var(--rd);border-left:3px solid var(--red);border-radius:var(--rl);padding:1.25rem;margin-bottom:10px;}
 .div-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .div-date{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;}
 .div-diff{font-family:'DM Mono',monospace;font-size:15px;font-weight:600;color:var(--red);}
@@ -218,7 +234,7 @@ tbody td.date{font-family:'DM Mono',monospace;color:var(--text2);font-size:12px;
 /* HISTÓRICO */
 .hist-row{display:grid;grid-template-columns:1.2fr 1.5fr 1fr 1.2fr 0.7fr 0.7fr 0.9fr 0.6fr;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;align-items:center;}
 .hist-row:last-child{border-bottom:none;}
-.hist-row:hover{background:rgba(255,255,255,.02);}
+.hist-row:hover{background:var(--hover);}
 .hist-head{background:var(--bg3);font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;}
 
 /* TOAST */
@@ -240,6 +256,7 @@ tbody td.date{font-family:'DM Mono',monospace;color:var(--text2);font-size:12px;
     <span class="logo-sub">/ Tesouraria</span>
   </div>
   <div class="topbar-right">
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Alternar tema claro/escuro">🌙</button>
     <span class="engine-badge">⚡ Motor local · sem IA</span>
   </div>
 </div>
@@ -352,7 +369,7 @@ tbody td.date{font-family:'DM Mono',monospace;color:var(--text2);font-size:12px;
     <div id="tab-historico" class="tab-content">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <span style="font-size:12px;color:var(--text3)">Últimas <span id="histTotal">0</span> análises salvas neste navegador</span>
-        <button onclick="limparHistorico()" style="display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--rd);border:1px solid var(--rb);border-radius:var(--r);color:var(--red);font-size:12px;font-weight:500;cursor:pointer;font-family:'Sora',sans-serif;transition:background .15s;" onmouseover="this.style.background='rgba(255,94,94,0.15)'" onmouseout="this.style.background='var(--rd)'">
+        <button onclick="limparHistorico()" style="display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--rd);border:1px solid var(--rb);border-radius:var(--r);color:var(--red);font-size:12px;font-weight:500;cursor:pointer;font-family:'Sora',sans-serif;transition:background .15s;" onmouseover="this.style.background='var(--rd-hover)'" onmouseout="this.style.background='var(--rd)'">
           🗑 Limpar histórico
         </button>
       </div>
@@ -378,11 +395,31 @@ let slotCounter = 0;
 let allResults = [];      // resultado por slot
 let currentSlotIdx = 0;
 let allLancamentos = [];
-let historico = JSON.parse(localStorage.getItem('concHist')||'[]');
+
+// localStorage pode falhar (política do navegador, file:// restrito, modo privado...). Isso não
+// pode travar o script inteiro no meio — as funções abaixo dessas linhas ficariam inacessíveis.
+function lsGet(key){ try{ return localStorage.getItem(key); }catch(e){ return null; } }
+function lsSet(key,val){ try{ localStorage.setItem(key,val); }catch(e){} }
+function lsRemove(key){ try{ localStorage.removeItem(key); }catch(e){} }
+
+let historico = JSON.parse(lsGet('concHist')||'[]');
+
+// ─── TEMA ────────────────────────────────────────────────
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn=document.getElementById('themeToggle');
+  if(btn) btn.textContent = theme==='light' ? '🌙' : '☀️';
+}
+function toggleTheme(){
+  const next = document.documentElement.getAttribute('data-theme')==='light' ? 'dark' : 'light';
+  applyTheme(next);
+  lsSet('theme', next);
+}
 
 // ─── INIT ─────────────────────────────────────────────────
 (function(){
-  const s=localStorage.getItem('scriptUrl'); if(s) document.getElementById('scriptUrl').value=s;
+  applyTheme(lsGet('theme') || 'dark');
+  const s=lsGet('scriptUrl'); if(s) document.getElementById('scriptUrl').value=s;
   adicionarSlot();
   renderHistorico();
 })();
@@ -517,7 +554,7 @@ async function handleFile(slotId, type, input){
     const cols = await getColumns(f);
     if(type==='bank'){
       slot.colsBank = cols; slot._bankName = f.name; slot._bankSize = (f.size/1024).toFixed(0)+' KB';
-      slot._bankWarn = cols.type==='excel' && cols.rows.length < 50;
+      slot._bankWarn = cols.rows && cols.rows.length < 50;
       extrairInfoSlot(slot, cols, type);
     } else {
       slot.colsErp = cols; slot._erpName = f.name; slot._erpSize = (f.size/1024).toFixed(0)+' KB';
@@ -573,7 +610,34 @@ function extrairInfoSlot(slot, cols, type){
 async function getColumns(f){
   const ext = f.name.toLowerCase().split('.').pop();
   if(ext==='pdf') return await getPdfColumns(f);
+  if(ext==='csv') return await getCsvColumns(f);
   return await getExcelColumns(f);
+}
+
+// Detecta a linha de cabeçalho (procura a 1ª linha com uma data real em uma das primeiras colunas)
+function detectHeaderRow(rows){
+  let firstDataRow=-1;
+  for(let i=0;i<Math.min(60,rows.length);i++){
+    const row=rows[i]||[];
+    const hasDate = row.slice(0,4).some(c=>{
+      const cc=typeof c==='string'?c.replace(/^'+/,'').trim():c;
+      return (c instanceof Date)||
+        (typeof cc==='string'&&/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(cc))||
+        (typeof c==='number'&&c>25000&&c<60000);
+    });
+    if(hasDate){firstDataRow=i;break;}
+  }
+  let headerRow=firstDataRow>0?firstDataRow-1:0;
+  for(let i=headerRow;i>=0;i--){
+    if((rows[i]||[]).some(c=>/^data$/i.test(String(c||'').replace(/^'+/,'').trim()))){headerRow=i;break;}
+  }
+  return headerRow;
+}
+
+function buildTableResult(rows, type){
+  const headerRow=detectHeaderRow(rows);
+  const headers=(rows[headerRow]||[]).map((h,i)=>({idx:i,name:String(h||`Coluna ${i+1}`).replace(/^'+/,'').trim()}));
+  return {headers,rows,headerRow,type};
 }
 
 async function getExcelColumns(f){
@@ -584,23 +648,7 @@ async function getExcelColumns(f){
         const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true,raw:true});
         const ws=wb.Sheets[wb.SheetNames[0]];
         const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-
-        // Detecta headerRow: procura primeira linha com data real
-        let firstDataRow=-1;
-        for(let i=0;i<Math.min(60,rows.length);i++){
-          const c0=rows[i][0];
-          const c0c=typeof c0==='string'?c0.replace(/^'+/,'').trim():c0;
-          const isDate=(c0 instanceof Date)||
-            (typeof c0c==='string'&&/^\d{2}\/\d{2}\/\d{4}$/.test(c0c))||
-            (typeof c0==='number'&&c0>40000&&c0<60000);
-          if(isDate){firstDataRow=i;break;}
-        }
-        let headerRow=firstDataRow>0?firstDataRow-1:0;
-        for(let i=headerRow;i>=0;i--){
-          if(/^data$/i.test(String(rows[i][0]||'').replace(/^'+/,'').trim())){headerRow=i;break;}
-        }
-        const headers=rows[headerRow].map((h,i)=>({idx:i,name:String(h||`Coluna ${i+1}`).replace(/^'+/,'').trim()}));
-        res({headers,rows,headerRow,type:'excel'});
+        res(buildTableResult(rows,'excel'));
       }catch(e){rej(e);}
     };
     r.onerror=()=>rej(new Error('Falha ao ler arquivo'));
@@ -608,130 +656,212 @@ async function getExcelColumns(f){
   });
 }
 
-async function getPdfColumns(f){
-  return new Promise(async(res,rej)=>{
-    try{
-      const buf=await f.arrayBuffer();
-      const pdf=await pdfjsLib.getDocument({data:buf}).promise;
-      let fullText='';
-      // Armazena items com posição para detectar colunas
-      let allItems=[];
-      for(let i=1;i<=pdf.numPages;i++){
-        const page=await pdf.getPage(i);
-        const tc=await page.getTextContent();
-        const vp=page.getViewport({scale:1});
-        const pageW=vp.width;
-        // Agrupa por linha (Y)
-        const lines={};
-        tc.items.forEach(item=>{
-          const y=Math.round(item.transform[5]);
-          const x=Math.round(item.transform[4]);
-          if(!lines[y]) lines[y]=[];
-          lines[y].push({x,text:item.str,xPct:Math.round(x/pageW*100)});
-          allItems.push({y,x,text:item.str,xPct:Math.round(x/pageW*100),page:i});
-        });
-        Object.keys(lines).sort((a,b)=>b-a).forEach(y=>{
-          const line=lines[y].sort((a,b)=>a.x-b.x).map(i=>i.text).join(' ').trim();
-          if(line) fullText+=line+'\n';
-        });
-      }
-
-      // Detecta formato: TOTVS (tem ENTRADAS e SAIDAS) ou Banco (tem Valor R$)
-      const upperText=fullText.toUpperCase();
-      const isTotvs=/ENTRADAS.*SAIDAS|SAIDAS.*ENTRADAS/.test(upperText);
-      const isBancoItau=/VALOR\s*\(R\$\)|VALOR \(R/.test(fullText)||/SISPAG|TAR BLOQUETO|RES APLIC AUT/.test(upperText);
-
-      if(isTotvs){
-        // Parser TOTVS: detecta posição X das colunas ENTRADAS e SAIDAS
-        const rawLines=fullText.split('\n').filter(l=>l.trim());
-        // Encontra linha de cabeçalho com ENTRADAS/SAIDAS
-        let colEntX=-1, colSaiX=-1;
-        for(const item of allItems){
-          if(/^ENTRADAS$/i.test(item.text.trim())) colEntX=item.x;
-          if(/^SAIDAS$/i.test(item.text.trim())) colSaiX=item.x;
-        }
-        // Extrai lançamentos por posição X
-        const lancamentos=parsePdfByPosition(allItems, 'totvs', colEntX, colSaiX);
-        const headers=[{idx:0,name:'DATA'},{idx:1,name:'OPERACAO'},{idx:4,name:'ENTRADAS'},{idx:5,name:'SAIDAS'}];
-        res({headers,rawLines,lancamentos,type:'pdf',subtype:'totvs',fullText});
-      } else {
-        // Parser Banco Itaú BBA: valor único com sinal
-        // Detecta posição X da coluna Valor(R$)
-        let colValX=-1;
-        for(const item of allItems){
-          if(/valor.*r\$/i.test(item.text)||/^valor$/i.test(item.text.trim())) colValX=item.x;
-        }
-        const lancamentos=parsePdfByPosition(allItems, 'banco', colValX, -1);
-        const headers=[{idx:0,name:'Data'},{idx:1,name:'Lançamento'},{idx:5,name:'Valor (R$)'}];
-        res({headers,rawLines:fullText.split('\n').filter(l=>/\d{2}\/\d{2}\/\d{4}/.test(l)),lancamentos,type:'pdf',subtype:'banco',fullText});
-      }
-    }catch(e){rej(e);}
-  });
+// Detecta separador (;  ,  tab  |) pela linha com mais ocorrências — CSV brasileiro costuma usar ";"
+async function getCsvColumns(f){
+  const text = await f.text();
+  const firstLine = (text.split(/\r?\n/).find(l=>l.trim()) || '');
+  const seps=[';',',','\t','|'];
+  const sep = seps.reduce((best,s)=> firstLine.split(s).length > firstLine.split(best).length ? s : best, seps[0]);
+  try{
+    const wb = XLSX.read(text, {type:'string', raw:true, FS:sep});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+    return buildTableResult(rows,'excel');
+  }catch(e){ throw new Error('Falha ao ler CSV: '+e.message); }
 }
 
-function parsePdfByPosition(allItems, mode, colValX, colSaiX){
-  // Agrupa items por linha Y
-  const byY={};
-  allItems.forEach(item=>{
-    const key=`${item.page}-${item.y}`;
-    if(!byY[key]) byY[key]={y:item.y,page:item.page,items:[]};
-    byY[key].items.push(item);
+// Extrai QUALQUER pdf tabular (extrato de banco, relatório de ERP, etc) reconstruindo
+// colunas a partir da posição X do texto — sem depender de layout de um banco específico.
+async function getPdfColumns(f){
+  const buf=await f.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  const items=[];
+  for(let p=1;p<=pdf.numPages;p++){
+    const page=await pdf.getPage(p);
+    const tc=await page.getTextContent();
+    tc.items.forEach(it=>{
+      const text=(it.str||'').trim();
+      if(!text) return;
+      items.push({page:p, x:it.transform[4], y:it.transform[5], w:it.width||0, text});
+    });
+  }
+  if(!items.length) throw new Error('PDF sem texto extraível — provavelmente é uma imagem digitalizada. Exporte como Excel/CSV.');
+
+  // Alguns geradores de PDF (relatórios de largura fixa tipo mainframe, ex: TOTVS/SIGA) emitem a
+  // linha INTEIRA como um único bloco de texto, em vez de uma palavra por bloco. Sem isso, não dá
+  // pra detectar colunas por posição. Quebra esses blocos em "palavras" nos espaços largos (2+),
+  // estimando a posição X de cada pedaço pela fração do texto/largura já percorrida.
+  const splitItems=[];
+  items.forEach(it=>{
+    if(!it.w || it.text.length<2 || !/\s{2,}/.test(it.text)){ splitItems.push(it); return; }
+    let idx=0;
+    it.text.split(/(\s{2,})/).forEach(chunk=>{
+      if(!/^\s{2,}$/.test(chunk) && chunk.trim()){
+        splitItems.push({page:it.page, y:it.y, text:chunk.trim(),
+          x: it.x + (idx/it.text.length)*it.w, w: (chunk.length/it.text.length)*it.w});
+      }
+      idx+=chunk.length;
+    });
   });
 
-  const rows=Object.values(byY)
-    .sort((a,b)=>a.page!==b.page?a.page-b.page:b.y-a.y)
-    .map(r=>({...r,items:r.items.sort((a,b)=>a.x-b.x)}));
-
-  const result=[];
-  const tolerance=30; // pixels de tolerância para alinhamento de coluna
-
-  rows.forEach(row=>{
-    const texts=row.items;
-    // Procura data na linha
-    const dateItem=texts.find(t=>/^\d{2}\/\d{2}\/\d{4}$/.test(t.text.trim()));
-    if(!dateItem) return;
-    const date=dateItem.text.trim();
-    // Descrição: items entre a data e o valor
-    const desc=texts.filter(t=>t.x>dateItem.x+20 && (colValX<0||t.x<colValX-20) && (colSaiX<0||t.x<colSaiX-20))
-      .map(t=>t.text).join(' ').trim();
-    if(/^saldo/i.test(desc)||/^total$/i.test(desc)) return;
-
-    let cred=0,deb=0;
-    if(mode==='banco'){
-      // Itaú BBA: coluna Valor(R$) com sinal
-      const valItems=texts.filter(t=>colValX>0?Math.abs(t.x-colValX)<tolerance*3:false);
-      let valText=valItems.map(t=>t.text).join('').trim();
-      if(!valText){
-        // Fallback: último número da linha
-        const nums=texts.filter(t=>/^-?[\d.,]+$/.test(t.text.replace(/\s/g,'')));
-        if(nums.length) valText=nums[nums.length-1].text;
-      }
-      const v=parseNum(valText);
-      if(!v) return;
-      if(v<0) deb=Math.abs(v); else cred=v;
+  // Agrupa em linhas: mesma página + Y próximo
+  splitItems.sort((a,b)=>a.page-b.page || b.y-a.y || a.x-b.x);
+  const yTol=3;
+  const lines=[];
+  splitItems.forEach(it=>{
+    const last=lines[lines.length-1];
+    if(!last || last.page!==it.page || Math.abs(last.y-it.y)>yTol){
+      lines.push({page:it.page, y:it.y, items:[it]});
     } else {
-      // TOTVS: colunas ENTRADAS e SAIDAS
-      const entItems=texts.filter(t=>colValX>0?Math.abs(t.x-colValX)<tolerance*2:false);
-      const saiItems=texts.filter(t=>colSaiX>0?Math.abs(t.x-colSaiX)<tolerance*2:false);
-      const entText=entItems.map(t=>t.text).join('').trim();
-      const saiText=saiItems.map(t=>t.text).join('').trim();
-      cred=parseNum(entText)||0;
-      deb=parseNum(saiText)||0;
-      if(!cred&&!deb){
-        // Fallback por contexto
-        const lower=(desc+' ').toLowerCase();
-        const nums=texts.filter(t=>/^[\d.,]+$/.test(t.text.replace(/\s/g,'')));
-        if(nums.length){
-          const v=parseNum(nums[nums.length-1].text);
-          if(lower.includes('valor pago')||lower.includes('saida')||lower.includes('trans entre')) deb=v;
-          else cred=v;
-        }
-      }
+      last.items.push(it);
     }
-    if(!cred&&!deb) return;
-    result.push({data:date,desc,cred,deb});
   });
-  return result;
+  lines.forEach(l=>l.items.sort((a,b)=>a.x-b.x));
+
+  const fullText=lines.map(l=>l.items.map(i=>i.text).join(' ')).join('\n');
+  const dateRe=/^\d{1,2}\/\d{1,2}\/\d{2,4}$/;
+
+  // Um PDF costuma ter várias "tabelas" na mesma página (saldos, limites, lançamentos, histórico
+  // de saldo diário...) e, além disso, datas soltas em frases antes da tabela ("Entre 01/07/2026 e
+  // 31/07/2026", "Emissão: 05/08/2026"). Por isso NÃO usamos "a 1ª linha com uma data" pra achar o
+  // cabeçalho — em vez disso, achamos a linha que mais parece cabeçalho de LANÇAMENTOS (tem "Data" +
+  // Crédito/Débito, ou "Data" + Valor), priorizando quem tem Crédito e Débito por ser mais específico.
+  let headerLineIdx=-1, headerSig=null;
+  lines.forEach((l,i)=>{
+    const sig=headerSignature(l.items);
+    if(sig.score>0 && (!headerSig || sig.score>headerSig.score)){ headerSig=sig; headerLineIdx=i; }
+  });
+  if(headerLineIdx<0){
+    // Fallback: nenhum cabeçalho reconhecível — usa a 1ª linha com data isolada
+    const firstDataLine=lines.findIndex(l=>l.items.some(it=>dateRe.test(it.text)));
+    if(firstDataLine<0) throw new Error('Não encontrei nenhum lançamento com data no PDF. Verifique se é um extrato/relatório tabular.');
+    headerLineIdx=Math.max(0,firstDataLine-1);
+    headerSig=headerSignature(lines[headerLineIdx].items);
+  }
+
+  // Acha onde a tabela de lançamentos termina: uma linha com a palavra "Total" isolada (pode vir
+  // no início, ex: "Total 211.033,29 -211.033,29", ou no fim, ex: "NAO CONCILIADOS CONCILIADOS
+  // TOTAL" — que é o cabeçalho do resumo/totais do período, não uma linha do início de outra tabela
+  // diferente (cabeçalho repetido por paginação, com a mesma assinatura, NÃO conta como fim).
+  let cutoff=lines.length;
+  for(let i=headerLineIdx+1;i<lines.length;i++){
+    const ln=lines[i];
+    const hasTotal=ln.items.some(it=>/^total$/i.test(it.text.trim()));
+    if(hasTotal){ cutoff=i; break; }
+    const sig=headerSignature(ln.items);
+    if(sig.score>0){
+      const same=sig.score===headerSig.score&&sig.hasCred===headerSig.hasCred&&sig.hasDeb===headerSig.hasDeb&&sig.hasVal===headerSig.hasVal;
+      if(!same){ cutoff=i; break; }
+    }
+  }
+  const tableLines=lines.slice(headerLineIdx, cutoff);
+
+  // Colunas: usa a posição das próprias palavras do cabeçalho como fronteira (o ponto médio entre
+  // uma palavra e a próxima) — é mais confiável que procurar "vãos vazios" nas linhas de dados,
+  // porque em relatórios de largura fixa o vão entre colunas pode ficar quase todo ocupado (ex: uma
+  // data com 10 caracteres deixa só 1 espaço de folga na coluna "Data"). Só cai pra detecção por
+  // vão em branco nas linhas de dados se o cabeçalho não tiver palavras separadas o suficiente.
+  let boundaries=headerTokenBoundaries(tableLines[0]?.items||[]);
+  if(boundaries.length<1){
+    const txLines=tableLines.filter(l=>l.items.some(it=>dateRe.test(it.text)));
+    const sample=[tableLines[0], ...txLines.slice(0,60)];
+    boundaries=detectColumnBoundaries(sample);
+  }
+
+  let rows;
+  if(boundaries.length>=1){
+    rows=tableLines.map(l=>assignItemsToColumns(l.items, boundaries));
+  } else {
+    // Fallback: não deu pra identificar colunas — extrai Data/Descrição/Valor por linha via regex
+    rows=fallbackLineRows(tableLines);
+  }
+
+  const headers=(rows[0]||[]).map((h,i)=>({idx:i,name:String(h||`Coluna ${i+1}`).trim()}));
+  return {headers, rows, headerRow:0, type:'pdf', fullText};
+}
+
+// Uma linha "parece" cabeçalho de tabela de lançamentos quando tem "Data" isolado + Crédito/Débito
+// (score 2, mais específico) ou "Data" + Valor único (score 1). Serve tanto pra achar a tabela certa
+// entre várias no mesmo PDF quanto pra saber se um cabeçalho repetido (paginação) é o mesmo de antes.
+function headerSignature(items){
+  const hasData=items.some(it=>/^data$/i.test(it.text.trim()));
+  const hasCred=items.some(it=>/(entr|créd|cred)/i.test(it.text)&&!/(deb|said)/i.test(it.text));
+  const hasDeb=items.some(it=>/(said|déb|deb)/i.test(it.text)&&!/(cred|entr)/i.test(it.text));
+  const hasVal=items.some(it=>/valor/i.test(it.text)&&!/sald/i.test(it.text));
+  const score=hasData&&hasCred&&hasDeb?2:hasData&&hasVal?1:0;
+  return {score,hasData,hasCred,hasDeb,hasVal};
+}
+
+// Fronteira de coluna = ponto médio entre o fim de uma palavra do cabeçalho e o início da próxima.
+// Cada palavra do cabeçalho já é (depois do split de blocos largos) um rótulo de coluna distinto.
+function headerTokenBoundaries(items){
+  if(items.length<2) return [];
+  const sorted=[...items].sort((a,b)=>a.x-b.x);
+  const boundaries=[];
+  for(let i=1;i<sorted.length;i++){
+    const prevEnd=sorted[i-1].x+(sorted[i-1].w||0);
+    boundaries.push((prevEnd+sorted[i].x)/2);
+  }
+  return boundaries;
+}
+
+// Acha as fronteiras de coluna: faixas de X onde nenhum texto (de nenhuma linha da amostra) passa —
+// os "corredores" em branco que separam colunas numa tabela. Usado como reserva quando o cabeçalho
+// não tem palavras separadas o suficiente.
+function detectColumnBoundaries(sampleLines){
+  const items=sampleLines.filter(Boolean).flatMap(l=>l.items);
+  if(items.length<2) return [];
+  const widthOf=it=>it.w>0?it.w:Math.max(it.text.length*4.5,5);
+  const minX=Math.min(...items.map(it=>it.x));
+  const maxX=Math.max(...items.map(it=>it.x+widthOf(it)));
+  if(maxX-minX<10) return [];
+  const bucket=3;
+  const n=Math.ceil((maxX-minX)/bucket)+2;
+  const density=new Array(n).fill(0);
+  items.forEach(it=>{
+    const sb=Math.max(0,Math.floor((it.x-minX)/bucket));
+    const eb=Math.min(n-1,Math.floor((it.x+widthOf(it)-minX)/bucket));
+    for(let b=sb;b<=eb;b++) density[b]++;
+  });
+  const minGapBuckets=Math.max(2,Math.round(12/bucket));
+  const boundaries=[];
+  let gapStart=-1;
+  for(let b=0;b<n;b++){
+    if(density[b]===0){
+      if(gapStart<0) gapStart=b;
+    } else {
+      if(gapStart>=0 && (b-gapStart)>=minGapBuckets) boundaries.push(minX+(gapStart+(b-gapStart)/2)*bucket);
+      gapStart=-1;
+    }
+  }
+  return boundaries;
+}
+
+// Encaixa cada pedaço de texto na coluna cujo intervalo [fronteira anterior, próxima fronteira) contém seu X
+function assignItemsToColumns(items, boundaries){
+  const cells=new Array(boundaries.length+1).fill('');
+  items.forEach(it=>{
+    let col=0;
+    while(col<boundaries.length && it.x>=boundaries[col]) col++;
+    cells[col]=cells[col]?cells[col]+' '+it.text:it.text;
+  });
+  return cells;
+}
+
+function fallbackLineRows(lines){
+  const dateRe=/(\d{1,2}\/\d{1,2}\/\d{2,4})/;
+  const numRe=/-?\(?\d{1,3}(?:\.\d{3})*,\d{2}\)?/g;
+  const rows=[['Data','Descrição','Valor']];
+  lines.forEach(l=>{
+    const text=l.items.map(i=>i.text).join(' ');
+    const dm=text.match(dateRe); if(!dm) return;
+    const nums=[...text.matchAll(numRe)].map(m=>m[0]);
+    if(!nums.length) return;
+    const valorRaw=nums[nums.length-1];
+    const desc=text.replace(dm[0],'').replace(valorRaw,'').replace(/\s+/g,' ').trim();
+    rows.push([dm[1], desc, valorRaw]);
+  });
+  return rows;
 }
 
 // ─── PARSE ROWS ──────────────────────────────────────────
@@ -749,46 +879,57 @@ function parseRows(cols, slotId, prefix){
   const iDeb  = !auto.useValorUnico&&auto.debCol?auto.debCol.idx:getIdx('Deb');
   const iVal  = auto.useValorUnico&&auto.valCol?auto.valCol.idx:getIdx('Val');
 
-  const rows=[];
-  if(cols.type==='excel'){
-    cols.rows.slice(cols.headerRow+1).forEach(row=>{
-      const rawDate=iData>=0?row[iData]:null;
-      const dateKey=parseExcelDate(rawDate);
-      if(!dateKey) return;
-      const desc=iDesc>=0?String(row[iDesc]||''). replace(/^'+/,'').trim():'';
-      if(/^saldo\s/i.test(desc)||/^(total|limite|resumo)\b/i.test(desc)) return;
-      let cred=0,deb=0;
-      if(auto.useValorUnico){
-        const v=parseNum(row[iVal]);
-        if(!v) return;
-        if(v<0) deb=Math.abs(v); else cred=v;
-      } else {
-        cred=iCred>=0?Math.abs(parseNum(row[iCred])):0;
-        deb=iDeb>=0?Math.abs(parseNum(row[iDeb])):0;
-        if(!cred&&!deb) return;
-      }
-      rows.push({data:dateKey,desc,cred,deb});
-    });
-  } else {
-    // PDF: usa lançamentos pré-processados por posição se disponíveis
-    if(cols.lancamentos && cols.lancamentos.length){
-      cols.lancamentos.forEach(l=>rows.push(l));
+  // Alguns extratos (e planilhas com células de data mescladas) só imprimem a data na 1ª
+  // transação do dia/grupo, deixando as linhas seguintes sem data própria — e às vezes a
+  // descrição quebra em 2 linhas, com o valor só aparecendo na segunda. Por isso não descarta
+  // essas linhas na hora: guarda tudo primeiro, depois herda a data de cima e junta a descrição
+  // de linhas "órfãs" (sem valor nenhum) na linha seguinte, antes de filtrar o que sobrou inválido.
+  const raw=[];
+  cols.rows.slice(cols.headerRow+1).forEach(row=>{
+    const rawDate=iData>=0?row[iData]:null;
+    const dateKey=parseExcelDate(rawDate);
+    const desc=iDesc>=0?String(row[iDesc]||'').replace(/^'+/,'').trim():'';
+    if(/^saldo\s/i.test(desc)||/^(total|limite|resumo)\b/i.test(desc)) return;
+    // Relatórios paginados (ex: SIGA/TOTVS) repetem uma linha "Agência: X Conta: Y Saldo Inicial:
+    // Z" a cada quebra de página — inclusive quando exportados pra Excel. Se o número da conta cair
+    // por coincidência na coluna de Crédito/Débito, vira um lançamento fantasma. Ignora a linha
+    // inteira quando ela tem essa cara, não importa em qual coluna cada pedaço caiu.
+    if(/\b(ag[êe]ncia|conta|saldo\s+inicial)\s*:/i.test(row.map(c=>String(c==null?'':c)).join(' '))) return;
+    let cred=0,deb=0;
+    if(auto.useValorUnico){
+      const v=parseNum(row[iVal]);
+      if(v<0) deb=Math.abs(v); else if(v>0) cred=v;
     } else {
-      // Fallback: parse por contexto
-      (cols.rawLines||[]).forEach(line=>{
-        const dm=line.match(/(\d{2}\/\d{2}\/\d{4})/);
-        if(!dm) return;
-        const nums=[...line.matchAll(/[\d.,]+/g)].map(m=>parseNum(m[0])).filter(n=>n>0&&n<1e9);
-        const desc=line.replace(/\d{2}\/\d{2}\/\d{4}/g,'').replace(/[\d.,]+/g,'').replace(/\s+/g,' ').trim();
-        if(!nums.length) return;
-        let cred=0,deb=0;
-        const lower=line.toLowerCase();
-        if(lower.includes('resgate')||lower.includes('rentab')||lower.includes('trans entre')||lower.includes('rem:')||lower.includes('credito')||lower.includes('crédito')){cred=nums[nums.length-2]||nums[0];}
-        else{deb=nums[nums.length-2]||nums[0];}
-        if(!cred&&!deb) return;
-        rows.push({data:dm[1],desc,cred,deb});
-      });
+      cred=iCred>=0?Math.abs(parseNum(row[iCred])):0;
+      deb=iDeb>=0?Math.abs(parseNum(row[iDeb])):0;
     }
+    if(!dateKey&&!desc&&!cred&&!deb) return;
+    raw.push({data:dateKey,desc,cred,deb});
+  });
+
+  // Corta o "rabo" final que não tem nem data nem valor — costuma ser rodapé/aviso legal do PDF
+  // (ex: telefone de atendimento) que vazou pra dentro da tabela por não ter um marcador claro
+  // de fim (tipo uma linha "Total") antes dele.
+  let lastMeaningfulIdx=-1;
+  raw.forEach((r,i)=>{ if(r.data||r.cred||r.deb) lastMeaningfulIdx=i; });
+  if(lastMeaningfulIdx>=0 && lastMeaningfulIdx<raw.length-1) raw.length=lastMeaningfulIdx+1;
+
+  let lastDate=null;
+  raw.forEach(r=>{ if(r.data) lastDate=r.data; else r.data=lastDate; });
+
+  // Linha "órfã" (só descrição, sem valor) é quase sempre a continuação da descrição da
+  // transação ANTERIOR que quebrou em 2 linhas (ex: "TARIFA BANCARIA" numa linha com o valor,
+  // "Max Empresarial 1" sozinha na linha seguinte) — por isso gruda pra trás, não pra frente.
+  const rows=[];
+  for(let i=0;i<raw.length;i++){
+    const r=raw[i];
+    const isOrphan = !r.cred && !r.deb && r.desc;
+    if(isOrphan){
+      if(rows.length){ rows[rows.length-1].desc=(rows[rows.length-1].desc+' '+r.desc).trim(); }
+      else if(i+1<raw.length){ raw[i+1].desc=(r.desc+' '+raw[i+1].desc).trim(); }
+      continue;
+    }
+    if(r.data && (r.cred||r.deb)) rows.push(r);
   }
   return rows;
 }
@@ -968,7 +1109,7 @@ function renderAll(slotsOk){
         const t=slot.result.totais;
         const dt=t.diferenca_total;
         const cls=Math.abs(dt)>0.01?'kpi-amber':'kpi-green';
-        return `<div class="kpi-card" style="cursor:pointer;border-color:${Math.abs(dt)>0.01?'rgba(255,179,71,.3)':'rgba(0,212,161,.2)'}" onclick="selecionarBanco('${slot.id}')">
+        return `<div class="kpi-card" style="cursor:pointer;border-color:${Math.abs(dt)>0.01?'var(--ab)':'var(--gb)'}" onclick="selecionarBanco('${slot.id}')">
           <div class="kpi-label">🏦 ${slot.empresa.slice(0,22)}</div>
           <div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:6px">${slot.conta||'?'}</div>
           <div class="kpi-value ${cls}" style="font-size:16px">${fmtDiff(dt)}</div>
@@ -1132,7 +1273,7 @@ function filtrarLancamentos(){
 function limparHistorico(){
   if(!confirm(`Limpar ${historico.length} registro(s) do histórico?\n\nIsso remove apenas o histórico deste navegador. Para limpar o Google Sheets, acesse a planilha e delete as linhas manualmente.`)) return;
   historico=[];
-  localStorage.removeItem('concHist');
+  lsRemove('concHist');
   renderHistorico();
   showToast('Histórico local limpo!');
 }
@@ -1140,7 +1281,7 @@ function limparHistorico(){
 function salvarHistoricoLocal(data,empresa,conta){
   historico.unshift({dataAnalise:new Date().toLocaleString('pt-BR'),empresa,conta:conta||'',periodo:data.periodo.inicio+' a '+data.periodo.fim,totalDias:data.totais.total_dias,divergencias:data.totais.dias_divergentes,deltaTotal:data.totais.diferenca_total,sheets:false});
   if(historico.length>100) historico=historico.slice(0,100);
-  localStorage.setItem('concHist',JSON.stringify(historico));
+  lsSet('concHist',JSON.stringify(historico));
 }
 function renderHistorico(){
   const hb=document.getElementById('histBody'),hc=document.getElementById('histCount');
@@ -1164,8 +1305,8 @@ async function testarScript(){
   const st=document.getElementById('sheetsStatus');
   if(!url){st.textContent='⚠ Cole a URL';st.className='sheets-status';return;}
   st.textContent='⟳ Testando...';st.className='sheets-status';
-  try{ await fetch(url,{method:'GET',mode:'no-cors'}); st.textContent='✓ Conectado';st.className='sheets-status ok';localStorage.setItem('scriptUrl',url);}
-  catch(e){ st.textContent='✓ URL salva';st.className='sheets-status ok';localStorage.setItem('scriptUrl',url);}
+  try{ await fetch(url,{method:'GET',mode:'no-cors'}); st.textContent='✓ Conectado';st.className='sheets-status ok';lsSet('scriptUrl',url);}
+  catch(e){ st.textContent='✓ URL salva';st.className='sheets-status ok';lsSet('scriptUrl',url);}
 }
 async function salvarSheets(slotsOk){
   const url=document.getElementById('scriptUrl').value.trim(); if(!url) return;
@@ -1178,7 +1319,7 @@ async function salvarSheets(slotsOk){
     document.getElementById('sheetsSaving').classList.remove('show');
     showToast('Salvo no Google Sheets!','sheets');
     historico.slice(0,slotsOk.length).forEach(h=>h.sheets=true);
-    localStorage.setItem('concHist',JSON.stringify(historico));
+    lsSet('concHist',JSON.stringify(historico));
     renderHistorico();
   }catch(e){ document.getElementById('sheetsSaving').classList.remove('show'); }
 }
