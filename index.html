@@ -694,8 +694,21 @@ let syncPollTimer=null;
 async function carregarDadosCompartilhados(silencioso){
   try{
     const dados=await chamadaJSONP({action:'getSharedData'}, 15000);
-    contasCadastradas=dados.contas||[];
-    historico=dados.historico||[];
+
+    // Rede de segurança: se a planilha ainda não tem nada de uma coleção mas o
+    // navegador tem dado local (ex.: primeira vez que a sincronização entra no ar),
+    // sobe o dado local pra planilha em vez de apagar o que já existia.
+    if((!dados.contas||!dados.contas.length) && contasCadastradas.length){
+      chamadaPost({action:'addItems', collection:'contas', items:contasCadastradas});
+    } else {
+      contasCadastradas=dados.contas||[];
+    }
+    if((!dados.historico||!dados.historico.length) && historico.length){
+      chamadaPost({action:'addItems', collection:'historico', items:historico});
+    } else {
+      historico=dados.historico||[];
+    }
+
     if(dados.regras) regras=dados.regras;
     pendenciasStatus=dados.pendenciasStatus||{};
     auditLog=dados.auditLog||[];
