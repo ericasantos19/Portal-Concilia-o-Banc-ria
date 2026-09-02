@@ -662,18 +662,67 @@ const AUTH_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx2Q_3n4eWnRcmv
 
 // O Google Apps Script não devolve cabeçalhos de CORS, então fetch() normal não consegue LER a
 // resposta (a chamada chega no servidor, mas o navegador bloqueia a leitura). JSONP contorna isso
-// carregando a resposta como uma tag <script>, que não tem essa restrição.
-function checarAcesso(email){
+// carregando a resposta como uma tag <script>, que não tem essa restrição. Serve pra tudo que
+// precisa LER dado da planilha (login, sincronizar contas/conciliações/pendências/regras).
+function chamadaJSONP(params, timeoutMs){
   return new Promise((resolve, reject) => {
-    const cbName = '__authCb_'+Date.now()+'_'+Math.floor(Math.random()*1e6);
+    const cbName = '__cb_'+Date.now()+'_'+Math.floor(Math.random()*1e6);
     const script = document.createElement('script');
-    const timer = setTimeout(()=>{ cleanup(); reject(new Error('tempo esgotado, verifique sua conexão')); }, 18000);
+    const timer = setTimeout(()=>{ cleanup(); reject(new Error('tempo esgotado, verifique sua conexão')); }, timeoutMs||18000);
     function cleanup(){ clearTimeout(timer); delete window[cbName]; script.remove(); }
     window[cbName] = (res)=>{ cleanup(); resolve(res); };
     script.onerror = ()=>{ cleanup(); reject(new Error('falha ao carregar')); };
-    script.src = AUTH_SCRIPT_URL+'?action=checkUser&email='+encodeURIComponent(email)+'&callback='+cbName;
+    const qs=new URLSearchParams(Object.assign({}, params, {callback:cbName})).toString();
+    script.src = AUTH_SCRIPT_URL+'?'+qs;
     document.head.appendChild(script);
   });
+}
+
+// Chamada genérica via POST (fire-and-forget) — usada pra ESCREVER no backend. O Apps Script não
+// devolve CORS pra fetch(), então nem tentamos ler a resposta; o próximo ciclo de sincronização
+// (a cada 20s, ou a próxima leitura) confirma o que realmente ficou salvo.
+function chamadaPost(payload){
+  fetch(AUTH_SCRIPT_URL, {method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)}).catch(()=>{});
+}
+
+function checarAcesso(email){
+  return chamadaJSONP({action:'checkUser', email});
+}
+
+// ─── SINCRONIZAÇÃO COM A PLANILHA (dados compartilhados por todo o time) ────
+let syncPollTimer=null;
+async function carregarDadosCompartilhados(silencioso){
+  try{
+    const dados=await chamadaJSONP({action:'getSharedData'}, 15000);
+    contasCadastradas=dados.contas||[];
+    historico=dados.historico||[];
+    if(dados.regras) regras=dados.regras;
+    pendenciasStatus=dados.pendenciasStatus||{};
+    auditLog=dados.auditLog||[];
+    lsSet('contasCadastradas', JSON.stringify(contasCadastradas));
+    lsSet('concHist', JSON.stringify(historico));
+    lsSet('regrasCategorizacao', JSON.stringify(regras));
+    lsSet('pendenciasStatus', JSON.stringify(pendenciasStatus));
+    lsSet('auditLog', JSON.stringify(auditLog));
+    rerenderViewAtual();
+  }catch(e){
+    if(!silencioso) showToast('Não deu pra sincronizar com a planilha agora — mostrando dados salvos localmente.','error');
+  }
+}
+function rerenderViewAtual(){
+  const ativo=document.querySelector('.sidebar-item.active');
+  const view=ativo?ativo.id.replace('nav','').toLowerCase():'conciliacao';
+  if(view==='dashboard') renderDashboard();
+  else if(view==='contas') renderContas();
+  else if(view==='conciliacoes') renderConciliacoesView();
+  else if(view==='pendencias') renderPendencias();
+  else if(view==='regras') renderRegras();
+  else if(view==='historico') renderAuditLog();
+}
+function iniciarSincronizacaoAutomatica(){
+  if(syncPollTimer) return;
+  carregarDadosCompartilhados(true);
+  syncPollTimer=setInterval(()=>carregarDadosCompartilhados(true), 20000);
 }
 
 function liberarAcesso(nomeOuEmail){
@@ -683,6 +732,7 @@ function liberarAcesso(nomeOuEmail){
   if(badge){ badge.style.display='flex'; badge.innerHTML='👤 '+nomeOuEmail+' <button onclick="sairPortal()">sair</button>'; }
   const su=document.getElementById('sidebarUserName');
   if(su) su.textContent=nomeOuEmail;
+  iniciarSincronizacaoAutomatica();
 }
 
 function sairPortal(){
@@ -792,8 +842,10 @@ function adicionarRegra(){
   const chave=document.getElementById('regraChave').value.trim();
   const categoria=document.getElementById('regraCategoria').value.trim();
   if(!chave||!categoria){ showToast('Preencha palavra-chave e categoria.','error'); return; }
-  regras.push({id:Date.now()+Math.random(), chave:chave.toUpperCase(), categoria, ativa:true});
+  const item={id:Date.now()+Math.random(), chave:chave.toUpperCase(), categoria, ativa:true};
+  regras.push(item);
   lsSet('regrasCategorizacao', JSON.stringify(regras));
+  chamadaPost({action:'addItem', collection:'regras', item});
   document.getElementById('regraChave').value='';
   document.getElementById('regraCategoria').value='';
   renderRegras();
@@ -804,6 +856,7 @@ function removerRegra(id){
   const r=regras.find(x=>x.id===id);
   regras=regras.filter(x=>x.id!==id);
   lsSet('regrasCategorizacao', JSON.stringify(regras));
+  chamadaPost({action:'removeItem', collection:'regras', id});
   renderRegras();
   if(r) registrarAuditoria('Regra removida', `${r.chave} → ${r.categoria}`);
 }
@@ -811,6 +864,7 @@ function toggleRegra(id){
   const r=regras.find(x=>x.id===id); if(!r) return;
   r.ativa=!r.ativa;
   lsSet('regrasCategorizacao', JSON.stringify(regras));
+  chamadaPost({action:'updateItem', collection:'regras', id, patch:{ativa:r.ativa}});
   renderRegras();
 }
 function renderRegras(){
@@ -850,6 +904,7 @@ function listarPendencias(){
 function mudarStatusPendencia(pid, status){
   pendenciasStatus[pid]=status;
   lsSet('pendenciasStatus', JSON.stringify(pendenciasStatus));
+  chamadaPost({action:'setPendenciaStatus', pid, status});
 }
 function renderPendencias(){
   const body=document.getElementById('bodyPendencias'); if(!body) return;
@@ -892,9 +947,11 @@ function renderConciliacoesView(){
 let auditLog = JSON.parse(lsGet('auditLog')||'[]');
 
 function registrarAuditoria(acao, detalhe){
-  auditLog.unshift({quando:new Date().toLocaleString('pt-BR'), acao, detalhe:detalhe||''});
+  const item={quando:new Date().toLocaleString('pt-BR'), acao, detalhe:detalhe||''};
+  auditLog.unshift(item);
   if(auditLog.length>300) auditLog=auditLog.slice(0,300);
   lsSet('auditLog', JSON.stringify(auditLog));
+  if(typeof chamadaPost==='function') chamadaPost({action:'addItem', collection:'auditLog', item});
   const vh=document.getElementById('viewHistorico');
   if(vh && vh.style.display!=='none') renderAuditLog();
 }
@@ -921,8 +978,10 @@ function adicionarConta(){
   const banco=document.getElementById('ctaBanco').value.trim();
   const conta=document.getElementById('ctaConta').value.trim();
   if(!empresa||!banco||!conta){ showToast('Preencha empresa, banco e conta.','error'); return; }
-  contasCadastradas.push({id:Date.now()+Math.random(), empresa, banco, conta});
+  const item={id:Date.now()+Math.random(), empresa, banco, conta};
+  contasCadastradas.push(item);
   lsSet('contasCadastradas', JSON.stringify(contasCadastradas));
+  chamadaPost({action:'addItem', collection:'contas', item});
   document.getElementById('ctaEmpresa').value='';
   document.getElementById('ctaBanco').value='';
   document.getElementById('ctaConta').value='';
@@ -935,6 +994,7 @@ function removerConta(id){
   const c=contasCadastradas.find(x=>x.id===id);
   contasCadastradas = contasCadastradas.filter(c=>c.id!==id);
   lsSet('contasCadastradas', JSON.stringify(contasCadastradas));
+  chamadaPost({action:'removeItem', collection:'contas', id});
   renderContas();
   if(c) registrarAuditoria('Conta removida', `${c.empresa} — ${c.banco} — ${c.conta}`);
 }
@@ -981,7 +1041,7 @@ async function importarContasArquivo(input){
     }
     if(headerRow<0) throw new Error('Não encontrei colunas de Empresa, Banco e Conta na planilha. Baixe o modelo pra conferir o formato.');
 
-    let importadas=0, ignoradas=0;
+    let importadas=0, ignoradas=0; const novasContas=[];
     rows.slice(headerRow+1).forEach((row,idx)=>{
       const empresa=String(row[iEmpresa]||'').trim();
       const banco=String(row[iBanco]||'').trim();
@@ -991,10 +1051,13 @@ async function importarContasArquivo(input){
       if(!empresa||!banco||!contaNum){ if(empresa||banco||contaNum) ignoradas++; return; }
       const jaExiste=contasCadastradas.some(c=>c.empresa.toLowerCase()===empresa.toLowerCase() && c.banco.toLowerCase()===banco.toLowerCase() && normalizaConta(c.conta)===normalizaConta(conta));
       if(jaExiste){ ignoradas++; return; }
-      contasCadastradas.push({id:Date.now()+Math.random()+idx, empresa, banco, conta});
+      const item={id:Date.now()+Math.random()+idx, empresa, banco, conta};
+      contasCadastradas.push(item);
+      novasContas.push(item);
       importadas++;
     });
     lsSet('contasCadastradas', JSON.stringify(contasCadastradas));
+    if(novasContas.length) chamadaPost({action:'addItems', collection:'contas', items:novasContas});
     renderContas();
     registrarAuditoria('Contas importadas', `${importadas} conta(s) de ${f.name}${ignoradas?` (${ignoradas} ignorada(s)/duplicada(s))`:''}`);
     showToast(`${importadas} conta(s) importada(s)!${ignoradas?' '+ignoradas+' ignorada(s)/duplicada(s).':''}`);
@@ -1934,18 +1997,24 @@ function filtrarLancamentos(){
 
 // ─── HISTÓRICO ───────────────────────────────────────────
 function limparHistorico(){
-  if(!confirm(`Limpar ${historico.length} registro(s) do histórico?\n\nIsso remove apenas o histórico deste navegador. Para limpar o Google Sheets, acesse a planilha e delete as linhas manualmente.`)) return;
+  const msg=typeof chamadaPost==='function'
+    ?`Limpar ${historico.length} registro(s) do histórico?\n\nIsso apaga pra TODO O TIME (fica salvo na planilha compartilhada), não só no seu navegador.`
+    :`Limpar ${historico.length} registro(s) do histórico?\n\nIsso remove apenas o histórico deste navegador.`;
+  if(!confirm(msg)) return;
   historico=[];
   lsRemove('concHist');
+  if(typeof chamadaPost==='function') chamadaPost({action:'clearCollection', collection:'historico'});
   renderHistorico();
-  showToast('Histórico local limpo!');
+  showToast('Histórico limpo!');
 }
 
 function salvarHistoricoLocal(data,empresa,conta){
   const id=Date.now()+'_'+Math.floor(Math.random()*1e6);
-  historico.unshift({id,dataAnalise:new Date().toLocaleString('pt-BR'),empresa,conta:conta||'',periodo:data.periodo.inicio+' a '+data.periodo.fim,totalDias:data.totais.total_dias,divergencias:data.totais.dias_divergentes,deltaTotal:data.totais.diferenca_total,sheets:false,divergenciasDetalhe:data.divergencias||[]});
+  const item={id,dataAnalise:new Date().toLocaleString('pt-BR'),empresa,conta:conta||'',periodo:data.periodo.inicio+' a '+data.periodo.fim,totalDias:data.totais.total_dias,divergencias:data.totais.dias_divergentes,deltaTotal:data.totais.diferenca_total,sheets:false,divergenciasDetalhe:data.divergencias||[]};
+  historico.unshift(item);
   if(historico.length>100) historico=historico.slice(0,100);
   lsSet('concHist',JSON.stringify(historico));
+  if(typeof chamadaPost==='function') chamadaPost({action:'addItem', collection:'historico', item});
   registrarAuditoria('Conciliação processada', `${empresa} — ${conta||'?'} — ${data.totais.dias_divergentes} divergência(s)`);
 }
 function renderHistorico(){
