@@ -1115,9 +1115,11 @@ function periodoMesAno(periodo){
 function statusContaNoMes(conta, mesAno){
   const num=normalizaConta(conta.conta);
   if(!num) return null;
-  // pega a conciliação mais recente daquela conta dentro do mês selecionado
+  // pega a conciliação mais recente daquela conta dentro do mês selecionado — a comparação é nos
+  // dois sentidos porque o dígito verificador da conta (ex.: "98661-3") às vezes aparece no
+  // cadastro e não no extrato conciliado (ou vice-versa), então um número é só um prefixo do outro.
   const achou = historico
-    .filter(h=>normalizaConta(h.conta).includes(num) && periodoMesAno(h.periodo)===mesAno)
+    .filter(h=>{ const hn=normalizaConta(h.conta); return hn && (hn.includes(num)||num.includes(hn)) && periodoMesAno(h.periodo)===mesAno; })
     .sort((a,b)=>parseDateBR(b.periodo?.slice(0,10))-parseDateBR(a.periodo?.slice(0,10)))[0];
   return achou || null;
 }
