@@ -678,11 +678,13 @@ function chamadaJSONP(params, timeoutMs){
   });
 }
 
-// Chamada genérica via POST (fire-and-forget) — usada pra ESCREVER no backend. O Apps Script não
-// devolve CORS pra fetch(), então nem tentamos ler a resposta; o próximo ciclo de sincronização
-// (a cada 20s, ou a próxima leitura) confirma o que realmente ficou salvo.
+// Chamada genérica via POST — usada pra ESCREVER no backend. Diferente do GET, o Apps Script
+// aceita ler a resposta de um POST simples normalmente (sem precisar do truque de JSONP), então
+// já devolvemos a confirmação; a maioria dos chamadores dispara isso sem esperar (fire-and-forget),
+// mas quem precisa ter certeza que a gravação realmente aconteceu pode dar await.
 function chamadaPost(payload){
-  fetch(AUTH_SCRIPT_URL, {method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)}).catch(()=>{});
+  return fetch(AUTH_SCRIPT_URL, {method:'POST', mode:'cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload)})
+    .then(r=>r.json()).catch(()=>null);
 }
 
 function checarAcesso(email){
@@ -691,22 +693,32 @@ function checarAcesso(email){
 
 // ─── SINCRONIZAÇÃO COM A PLANILHA (dados compartilhados por todo o time) ────
 let syncPollTimer=null;
+// Rede de segurança: se a planilha ainda não tem nada de uma coleção mas o navegador tem dado
+// local (ex.: primeira vez que a sincronização entra no ar), sobe o dado local pra planilha em
+// vez de apagar o que já existia. Um "flag" salvo localmente garante que essa subida só é
+// tentada até dar certo uma vez — sem isso, cada ciclo de 20s tentaria de novo e duplicaria os
+// itens na planilha.
+async function migrarColecaoSeVazia(collection, listaLocal){
+  const flag='migrado_'+collection;
+  if(lsGet(flag) || !listaLocal.length) return;
+  const resp=await chamadaPost({action:'addItems', collection, items:listaLocal});
+  if(resp && resp.ok) lsSet(flag,'1');
+}
 async function carregarDadosCompartilhados(silencioso){
   try{
     const dados=await chamadaJSONP({action:'getSharedData'}, 15000);
 
-    // Rede de segurança: se a planilha ainda não tem nada de uma coleção mas o
-    // navegador tem dado local (ex.: primeira vez que a sincronização entra no ar),
-    // sobe o dado local pra planilha em vez de apagar o que já existia.
-    if((!dados.contas||!dados.contas.length) && contasCadastradas.length){
-      chamadaPost({action:'addItems', collection:'contas', items:contasCadastradas});
+    if(!dados.contas||!dados.contas.length){
+      await migrarColecaoSeVazia('contas', contasCadastradas);
     } else {
-      contasCadastradas=dados.contas||[];
+      contasCadastradas=dados.contas;
+      lsSet('migrado_contas','1');
     }
-    if((!dados.historico||!dados.historico.length) && historico.length){
-      chamadaPost({action:'addItems', collection:'historico', items:historico});
+    if(!dados.historico||!dados.historico.length){
+      await migrarColecaoSeVazia('historico', historico);
     } else {
-      historico=dados.historico||[];
+      historico=dados.historico;
+      lsSet('migrado_historico','1');
     }
 
     if(dados.regras) regras=dados.regras;
