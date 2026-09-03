@@ -693,33 +693,27 @@ function checarAcesso(email){
 
 // ─── SINCRONIZAÇÃO COM A PLANILHA (dados compartilhados por todo o time) ────
 let syncPollTimer=null;
-// Rede de segurança: se a planilha ainda não tem nada de uma coleção mas o navegador tem dado
-// local (ex.: primeira vez que a sincronização entra no ar), sobe o dado local pra planilha em
-// vez de apagar o que já existia. Um "flag" salvo localmente garante que essa subida só é
-// tentada até dar certo uma vez — sem isso, cada ciclo de 20s tentaria de novo e duplicaria os
-// itens na planilha.
-async function migrarColecaoSeVazia(collection, listaLocal){
-  const flag='migrado_'+collection;
-  if(lsGet(flag) || !listaLocal.length) return;
-  const resp=await chamadaPost({action:'addItems', collection, items:listaLocal});
-  if(resp && resp.ok) lsSet(flag,'1');
+// O envio de escrita (chamadaPost) é "atire e esqueça" nos pontos onde é disparado (não trava a
+// tela esperando confirmação) — então uma falha de rede pontual pode fazer um item nunca chegar
+// na planilha, mesmo aparecendo normalmente na tela de quem criou. Pra não perder isso de vista:
+// a cada ciclo de sincronização comparamos o que existe local x o que veio da planilha por "id",
+// e reenviamos só o que estiver faltando — cura automática, permanente, sem duplicar o que já
+// está lá.
+async function reconciliarColecao(collection, listaLocal, listaServidor){
+  listaServidor = listaServidor || [];
+  const idsServidor = new Set(listaServidor.map(x=>String(x.id)));
+  const faltando = listaLocal.filter(x=>!idsServidor.has(String(x.id)));
+  if(faltando.length) chamadaPost({action:'addItems', collection, items:faltando});
+  // mescla: prioriza o que a planilha já confirmou + o que ainda está pendente de subir, pra não
+  // sumir da tela enquanto o reenvio não é confirmado.
+  return [...faltando, ...listaServidor];
 }
 async function carregarDadosCompartilhados(silencioso){
   try{
     const dados=await chamadaJSONP({action:'getSharedData'}, 15000);
 
-    if(!dados.contas||!dados.contas.length){
-      await migrarColecaoSeVazia('contas', contasCadastradas);
-    } else {
-      contasCadastradas=dados.contas;
-      lsSet('migrado_contas','1');
-    }
-    if(!dados.historico||!dados.historico.length){
-      await migrarColecaoSeVazia('historico', historico);
-    } else {
-      historico=dados.historico;
-      lsSet('migrado_historico','1');
-    }
+    contasCadastradas = await reconciliarColecao('contas', contasCadastradas, dados.contas);
+    historico = await reconciliarColecao('historico', historico, dados.historico);
 
     if(dados.regras) regras=dados.regras;
     pendenciasStatus=dados.pendenciasStatus||{};
