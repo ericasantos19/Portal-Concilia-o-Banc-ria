@@ -996,7 +996,13 @@ function renderAuditLog(){
 // ─── CONTAS CADASTRADAS ────────────────────────────────────
 let contasCadastradas = JSON.parse(lsGet('contasCadastradas')||'[]');
 
-function normalizaConta(s){ return String(s||'').replace(/\D/g,''); }
+// Compara números de conta ignorando formatação: separa em blocos de dígitos (agência, conta,
+// dígito verificador...) e tira zero à esquerda de CADA bloco — porque planilhas de cadastro
+// costumam vir com conta preenchida com zeros (ex.: "0012961-5") enquanto o extrato bancário
+// grava sem esse preenchimento (ex.: "12961"), e uma comparação bruta dos dígitos não bateria.
+function normalizaConta(s){
+  return String(s||'').split(/\D+/).filter(Boolean).map(seg=>seg.replace(/^0+(?=\d)/,'')).join('');
+}
 
 function adicionarConta(){
   const empresa=document.getElementById('ctaEmpresa').value.trim();
