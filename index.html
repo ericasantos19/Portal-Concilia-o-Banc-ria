@@ -533,7 +533,7 @@ tbody td.date{font-family:'DM Mono',monospace;color:var(--text2);font-size:12px;
     <div class="sec-label" style="margin-bottom:0">Dashboard de fechamento</div>
     <div style="display:flex;align-items:center;gap:8px;">
       <span style="font-size:12px;color:var(--text2)">Mês de fechamento</span>
-      <input type="month" id="dashMesAno" onchange="renderDashboard()">
+      <input type="month" id="dashMesAno" onchange="lsSet('dashMesAno', this.value); renderDashboard()">
     </div>
   </div>
   <div class="kpi-row" id="dashKpiRow" style="grid-template-columns:repeat(3,1fr)"></div>
@@ -1124,9 +1124,16 @@ function statusContaNoMes(conta, mesAno){
   return achou || null;
 }
 
+function mesAnoAnterior(){
+  const d=new Date(); d.setMonth(d.getMonth()-1);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
 function renderDashboard(){
   const sel=document.getElementById('dashMesAno');
-  if(!sel.value){ const d=new Date(); sel.value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+  // O fechamento normalmente é feito nos primeiros dias do mês seguinte (ex.: fecha agosto em
+  // setembro), então o padrão é o mês anterior — e guarda a última escolha do usuário no
+  // navegador pra não "resetar" pro mês atual sempre que a página recarrega.
+  if(!sel.value){ sel.value = lsGet('dashMesAno') || mesAnoAnterior(); }
   const mesAno=sel.value;
   const body=document.getElementById('bodyDashboard'); body.innerHTML='';
 
@@ -1172,8 +1179,7 @@ function renderDashboard(){
   adicionarSlot();
   renderHistorico();
   renderContas();
-  const d=new Date();
-  document.getElementById('dashMesAno').value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  document.getElementById('dashMesAno').value = lsGet('dashMesAno') || mesAnoAnterior();
 })();
 
 // ─── SLOT MANAGEMENT ─────────────────────────────────────
